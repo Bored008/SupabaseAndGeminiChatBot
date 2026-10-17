@@ -82,78 +82,85 @@ export default function Navbar({
       {/* Workspace Toolbar */}
       <header className="h-14 sm:h-16 px-4 sm:px-6 xl:px-8 flex items-center justify-between border-b border-white/[0.04] bg-transparent select-none z-30 flex-shrink-0">
         {/* Left: Model Selector Pill */}
-        <div className="relative">
-          <button
-            onClick={() => setShowModelDropdown(!showModelDropdown)}
-            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-[#514452] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
-            title="Active Google Gemini Model"
-          >
-            <span>{selectedModel || 'Gemini 2.5 Flash'}</span>
-            <ChevronDownIcon className="w-3.5 h-3.5 text-[#99979D]" />
-          </button>
+        <div className="flex items-center justify-start flex-1 min-w-0">
+          <div className="relative">
+            <button
+              onClick={() => setShowModelDropdown(!showModelDropdown)}
+              className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-[#514452] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
+              title="Active Google Gemini Model"
+            >
+              <span>{selectedModel || 'Gemini 2.5 Flash'}</span>
+              <ChevronDownIcon className="w-3.5 h-3.5 text-[#99979D]" />
+            </button>
 
-          {showModelDropdown && (
-            <div className="absolute top-full left-0 mt-2 w-64 sm:w-72 bg-[#020202] border border-[#514452] rounded-[18px] p-2 shadow-2xl z-50 backdrop-blur-xl">
-              <div className="px-2.5 py-1.5 text-[11px] text-[#99979D] font-medium border-b border-white/5 mb-1 flex justify-between items-center">
-                <span>Google Gemini Models</span>
-                <span className="text-[10px] text-cyan-400 font-mono">Deno Edge</span>
+            {showModelDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-64 sm:w-72 bg-[#020202] border border-[#514452] rounded-[18px] p-2 shadow-2xl z-50 backdrop-blur-xl">
+                <div className="px-2.5 py-1.5 text-[11px] text-[#99979D] font-medium border-b border-white/5 mb-1 flex justify-between items-center">
+                  <span>Google Gemini Models</span>
+                  <span className="text-[10px] text-cyan-400 font-mono">Deno Edge</span>
+                </div>
+                {models.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => {
+                      setSelectedModel(m.name);
+                      setShowModelDropdown(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left text-[#F4F2F5] hover:bg-white/5 transition cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      {selectedModel === m.name ? (
+                        <Check className="w-3.5 h-3.5 text-purple-400" />
+                      ) : (
+                        <span className="w-3.5 h-3.5" />
+                      )}
+                      <span className="font-normal">{m.name}</span>
+                    </div>
+                    <span className="text-[10px] text-purple-300/80 bg-purple-950/60 px-2 py-0.5 rounded-full font-mono">
+                      {m.tag}
+                    </span>
+                  </button>
+                ))}
               </div>
-              {models.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => {
-                    setSelectedModel(m.name);
-                    setShowModelDropdown(false);
-                  }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left text-[#F4F2F5] hover:bg-white/5 transition cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    {selectedModel === m.name ? (
-                      <Check className="w-3.5 h-3.5 text-purple-400" />
-                    ) : (
-                      <span className="w-3.5 h-3.5" />
-                    )}
-                    <span className="font-normal">{m.name}</span>
-                  </div>
-                  <span className="text-[10px] text-purple-300/80 bg-purple-950/60 px-2 py-0.5 rounded-full font-mono">
-                    {m.tag}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+
+        {/* Center: Main Highlight View Switcher (Gemini Chat vs Login Audit Log) */}
+        <div className="flex items-center justify-center flex-shrink-0 mx-2 sm:mx-4">
+          <div className="flex items-center bg-[#020202] border border-purple-500/30 rounded-full p-1 sm:p-1.5 shadow-lg shadow-purple-950/40 backdrop-blur-md ring-1 ring-purple-500/15">
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`flex items-center gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+                activeTab === 'chat'
+                  ? 'bg-gradient-to-r from-purple-700 to-purple-600 text-white shadow-md shadow-purple-900/50 border border-purple-400/30'
+                  : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5'
+              }`}
+            >
+              <Cpu className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${activeTab === 'chat' ? 'text-cyan-300' : 'text-[#99979D]'}`} />
+              <span className="whitespace-nowrap tracking-wide">Gemini Chat</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('audit')}
+              className={`flex items-center gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+                activeTab === 'audit'
+                  ? 'bg-gradient-to-r from-purple-700 to-purple-600 text-white shadow-md shadow-purple-900/50 border border-purple-400/30'
+                  : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5'
+              }`}
+            >
+              <ShieldCheck className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${activeTab === 'audit' ? 'text-purple-200' : 'text-[#99979D]'}`} />
+              <span className="whitespace-nowrap tracking-wide">Audit Log</span>
+            </button>
+          </div>
         </div>
 
         {/* Right: Workspace Actions */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* View Switcher Pill */}
-          <div className="hidden md:flex items-center bg-[#020202] border border-white/5 rounded-full p-0.5 text-xs">
-            <button
-              onClick={() => setActiveTab('chat')}
-              className={`px-3 py-1.5 rounded-full transition cursor-pointer ${
-                activeTab === 'chat'
-                  ? 'bg-purple-900/60 text-white font-medium shadow-sm'
-                  : 'text-[#99979D] hover:text-white'
-              }`}
-            >
-              Gemini Chat
-            </button>
-            <button
-              onClick={() => setActiveTab('audit')}
-              className={`px-3 py-1.5 rounded-full transition cursor-pointer ${
-                activeTab === 'audit'
-                  ? 'bg-purple-900/60 text-white font-medium shadow-sm'
-                  : 'text-[#99979D] hover:text-white'
-              }`}
-            >
-              Audit Log
-            </button>
-          </div>
-
+        <div className="flex items-center justify-end gap-2.5 sm:gap-3 flex-1 min-w-0">
           {/* Configuration Action Pill */}
           <button
             onClick={() => setShowConfigModal(true)}
-            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
             title="Configure System Architecture & Persona"
           >
             <span>Configuration</span>
@@ -163,7 +170,7 @@ export default function Navbar({
           {/* Export Action Pill */}
           <button
             onClick={handleExportChat}
-            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
             title="Export Conversation Transcript"
           >
             <span>Export</span>
