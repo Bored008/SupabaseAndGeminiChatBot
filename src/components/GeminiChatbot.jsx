@@ -53,7 +53,8 @@ function FormattedMessage({ content }) {
                       setCopiedCodeIndex(index);
                       setTimeout(() => setCopiedCodeIndex(null), 2000);
                     }}
-                    className="flex items-center gap-1 hover:text-white transition py-0.5 px-1.5 rounded hover:bg-slate-800"
+                    className="flex items-center gap-1 hover:text-white transition py-0.5 px-1.5 rounded hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+                    aria-label="Copy code block"
                     title="Copy code"
                   >
                     {copiedCodeIndex === index ? (
@@ -147,7 +148,8 @@ const ChatMessage = React.memo(({ msg }) => {
               )}
               <button
                 onClick={() => copyResponse(msg.text)}
-                className="opacity-0 group-hover:opacity-100 transition p-1 hover:text-white"
+                className="opacity-0 group-hover:opacity-100 transition p-1 hover:text-white focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50 rounded"
+                aria-label="Copy message"
                 title="Copy message"
               >
                 {copied ? (
@@ -287,7 +289,8 @@ export default function GeminiChatbot() {
               },
             ])
           }
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 px-3 py-1.5 rounded-xl transition duration-150 cursor-pointer shadow-sm group"
+          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 px-3 py-1.5 rounded-xl transition duration-150 cursor-pointer shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+          aria-label="Clear Conversation"
           title="Clear Conversation"
         >
           <RotateCcw className="w-3.5 h-3.5 transition-transform group-hover:-rotate-90" />
@@ -356,7 +359,8 @@ export default function GeminiChatbot() {
                   key={i}
                   type="button"
                   onClick={() => handleSendMessage(s.text)}
-                  className="flex items-center gap-2 text-left p-2 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/5 hover:border-indigo-500/30 text-xs text-slate-300 hover:text-white transition duration-150 cursor-pointer shadow-sm group"
+                  className="flex items-center gap-2 text-left p-2 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/5 hover:border-indigo-500/30 text-xs text-slate-300 hover:text-white transition duration-150 cursor-pointer shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50"
+                  aria-label={`Ask: ${s.text}`}
                 >
                   <Icon className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform flex-shrink-0" />
                   <span className="truncate">{s.text}</span>
@@ -376,7 +380,9 @@ export default function GeminiChatbot() {
           }}
           className="flex items-center gap-2 bg-slate-900/80 border border-white/10 rounded-2xl p-1.5 pl-3.5 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 transition shadow-inner"
         >
+          <label htmlFor="chat-input" className="sr-only">Ask Gemini</label>
           <input
+            id="chat-input"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -388,7 +394,8 @@ export default function GeminiChatbot() {
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition duration-150 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-md shadow-indigo-600/20 group"
+            className="p-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition duration-150 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shadow-md shadow-indigo-600/20 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-indigo-500"
+            aria-label="Send Message"
             title="Send Message (Enter)"
           >
             <Send className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />

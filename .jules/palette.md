@@ -1,0 +1,3 @@
+## 2023-10-27 - Icon-only buttons lack ARIA labels and focus visibility
+**Learning:** Several icon-only buttons (copy code, refresh logs, clear conversation, etc.) lacked ARIA labels and visible focus styles. Input fields were missing associated labels, which is detrimental to screen reader users and keyboard navigation. Using Tailwind's `focus-visible` utility is crucial for providing clear keyboard focus without disrupting mouse users.
+**Action:** Always ensure icon-only buttons include an `aria-label` attribute and explicitly set `focus-visible` ring utilities (e.g., `focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:outline-none`) to improve accessibility. Add `.sr-only` labels for standalone input fields.

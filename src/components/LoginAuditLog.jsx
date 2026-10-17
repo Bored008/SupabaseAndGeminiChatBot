@@ -112,7 +112,8 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
             <button
               onClick={() => fetchLogs(true)}
               disabled={loading || refreshing}
-              className="p-2 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 rounded-xl transition duration-150 disabled:opacity-40 cursor-pointer shadow-sm group"
+              className="p-2 text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-white/10 rounded-xl transition duration-150 disabled:opacity-40 cursor-pointer shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+              aria-label="Refresh logs from database"
               title="Refresh logs from database"
             >
               <RefreshCw
@@ -128,7 +129,9 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
           <div className="relative flex-1">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <label htmlFor="audit-search" className="sr-only">Search audit logs</label>
             <input
+              id="audit-search"
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -235,7 +238,8 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
                       <span className="truncate max-w-[150px] sm:max-w-[180px]">{log.email}</span>
                       <button
                         onClick={() => copyToClipboard(log.email, log.id)}
-                        className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-white transition"
+                        className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-white transition focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded"
+                        aria-label="Copy email"
                         title="Copy email"
                       >
                         {copiedId === log.id ? (

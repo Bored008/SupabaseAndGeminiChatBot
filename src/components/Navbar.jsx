@@ -88,7 +88,8 @@ export default function Navbar({ user }) {
 
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-red-400 bg-slate-900/80 hover:bg-red-500/10 border border-white/10 hover:border-red-500/30 px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer shadow-sm group"
+            className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-red-400 bg-slate-900/80 hover:bg-red-500/10 border border-white/10 hover:border-red-500/30 px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+            aria-label="Sign Out"
             title="Sign Out"
           >
             <LogOut className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
