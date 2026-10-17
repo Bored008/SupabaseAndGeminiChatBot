@@ -1,0 +1,3 @@
+## 2025-02-18 - [Optimized GeminiChatbot Render Cycle]
+**Learning:** Uncontrolled input state changes at the top level of a component (like typing in a search or chat input) cause the entire component to re-render. If that component iterates over a list of items that require expensive parsing (e.g., markdown parsing inside `FormattedMessage`), this leads to severe performance degradation as the list grows.
+**Action:** Always extract complex list items that depend on static or isolated state into their own components. Wrap these extracted list items in `React.memo()` and co-locate state (like "copied" UI state) inside the child component. This isolates re-renders to only the elements that actually change, neutralizing the input state bottleneck.
