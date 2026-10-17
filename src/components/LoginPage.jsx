@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { Sparkles, Database, AlertCircle, Lock, Shield, Cpu, ArrowRight } from 'lucide-react';
+import { AlertCircle, Shield, Database, Cpu, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -32,33 +32,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950 text-slate-100 relative overflow-hidden selection:bg-indigo-500/30">
-      {/* Ambient glowing gradient orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-600/20 via-purple-600/20 to-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="h-screen w-screen flex items-center justify-center p-4 bg-[#09050f] text-slate-100 relative overflow-hidden font-sans select-none">
+      {/* Background ambient violet glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[550px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="w-full max-w-md glass-panel rounded-3xl p-8 sm:p-10 shadow-2xl relative z-10 border border-white/10 ring-1 ring-black/40">
-        {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white mb-4 shadow-xl shadow-indigo-500/30 ring-1 ring-white/20">
-            <Sparkles className="w-8 h-8 animate-pulse" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            FS-GenAI Unified App
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-2">
-            Assessment Dashboard: Auth, RLS Audit Logging & Gemini AI
+      <div className="w-full max-w-md zyricon-panel rounded-3xl p-8 sm:p-10 shadow-2xl relative z-10 border border-purple-500/20">
+        {/* Floating 3D Glowing Orb */}
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className="zyricon-orb mb-5" />
+          <h1 className="text-3xl font-bold tracking-tight text-white">Zyricon</h1>
+          <p className="text-xs text-slate-400 mt-2">
+            Intelligent Full-Stack Workspace powered by Supabase & Gemini
           </p>
         </div>
 
         {/* Configuration Notice if .env is missing */}
         {!isSupabaseConfigured && (
-          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-start gap-3 shadow-inner">
+          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-start gap-3">
             <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-400 mt-0.5" />
             <div>
               <p className="font-semibold text-amber-200">Supabase Credentials Required</p>
               <p className="mt-1 text-slate-300">
-                Please add <code className="bg-slate-800 px-1.5 py-0.5 rounded text-amber-300">VITE_SUPABASE_URL</code> and <code className="text-amber-300">VITE_SUPABASE_ANON_KEY</code> to your <code className="text-amber-300">.env</code> file.
+                Please add <code className="text-amber-300">VITE_SUPABASE_URL</code> and <code className="text-amber-300">VITE_SUPABASE_ANON_KEY</code> to your <code className="text-amber-300">.env</code> file.
               </p>
             </div>
           </div>
@@ -66,13 +61,13 @@ export default function LoginPage() {
 
         {/* Error Notice */}
         {errorMessage && (
-          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-start gap-3 shadow-inner">
+          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-start gap-3">
             <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400 mt-0.5" />
             <p className="mt-0.5 leading-relaxed">{errorMessage}</p>
           </div>
         )}
 
-        {/* Action Button */}
+        {/* Google Sign-In Button */}
         <div className="space-y-4">
           <button
             onClick={handleGoogleSignIn}
@@ -102,24 +97,24 @@ export default function LoginPage() {
               </svg>
             )}
             <span className="text-sm font-bold tracking-tight">
-              {loading ? 'Redirecting to Google...' : 'Continue with Google'}
+              {loading ? 'Connecting to Google...' : 'Continue with Google'}
             </span>
             <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform ml-auto" />
           </button>
         </div>
 
-        {/* Feature Highlights Footer */}
-        <div className="mt-8 pt-6 border-t border-white/5 grid grid-cols-3 gap-2 text-center text-xs text-slate-400">
-          <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/40 border border-white/5">
-            <Shield className="w-4 h-4 text-emerald-400" />
-            <span className="text-[11px] font-medium text-slate-300">RLS Security</span>
+        {/* Feature Badges */}
+        <div className="mt-8 pt-6 border-t border-purple-500/10 grid grid-cols-3 gap-2 text-center text-xs text-slate-400">
+          <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-[#140b22] border border-purple-500/15">
+            <Shield className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] font-medium text-slate-300">Postgres RLS</span>
           </div>
-          <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/40 border border-white/5">
+          <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-[#140b22] border border-purple-500/15">
             <Database className="w-4 h-4 text-cyan-400" />
-            <span className="text-[11px] font-medium text-slate-300">Postgres RPC</span>
+            <span className="text-[11px] font-medium text-slate-300">Invoker RPC</span>
           </div>
-          <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-slate-900/40 border border-white/5">
-            <Cpu className="w-4 h-4 text-purple-400" />
+          <div className="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-[#140b22] border border-purple-500/15">
+            <Cpu className="w-4 h-4 text-pink-400" />
             <span className="text-[11px] font-medium text-slate-300">Gemini Edge</span>
           </div>
         </div>

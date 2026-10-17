@@ -2,12 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabaseClient';
 import LoginPage from './components/LoginPage';
 import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 import LoginAuditLog from './components/LoginAuditLog';
 import GeminiChatbot from './components/GeminiChatbot';
 
 export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'audit'
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [refreshAuditTrigger, setRefreshAuditTrigger] = useState(0);
 
   // In-memory lock to eliminate React 18 StrictMode double-invoke race conditions
@@ -29,7 +32,7 @@ export default function App() {
       return;
     }
 
-    // Immediately claim locks synchronously BEFORE awaiting the network insert
+    // Claim locks synchronously BEFORE awaiting the network insert
     loggingLockRef.current.add(user.id);
     sessionStorage.setItem(sessionKey, 'true');
 
@@ -49,7 +52,6 @@ export default function App() {
 
       if (error) {
         console.error('Failed to insert login audit log:', error);
-        // Release locks if the actual database insert failed so user can retry
         loggingLockRef.current.delete(user.id);
         sessionStorage.removeItem(sessionKey);
       } else {
@@ -63,7 +65,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    // onAuthStateChange handles initial session and all auth events (SIGNED_IN, TOKEN_REFRESHED, etc.)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
@@ -85,11 +86,11 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-9 h-9 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-slate-400 font-medium tracking-wide">
-            Initializing Secure Session...
+      <div className="h-screen w-screen flex items-center justify-center bg-[#09050f] text-slate-100 font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="zyricon-orb" />
+          <p className="text-xs text-purple-300 font-medium tracking-wide animate-pulse">
+            Loading Workspace...
           </p>
         </div>
       </div>
@@ -101,32 +102,36 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-slate-950 text-slate-100 relative selection:bg-indigo-500/30 overflow-hidden">
-      {/* Ambient background glow meshes */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl" />
-      </div>
+    <div className="h-screen w-screen flex bg-[#09050f] text-slate-100 font-sans overflow-hidden select-none">
+      {/* Left Collapsible Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
 
-      <Navbar user={session.user} />
+      {/* Main View Area */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Top Navbar with IDE/Agentic Mode Switcher */}
+        <Navbar
+          user={session.user}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 lg:p-6 relative z-10 min-h-0 flex flex-col overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 h-full min-h-0 flex-1 overflow-hidden">
-          {/* Left Column: Login Audit Log (Task 2 + Task 1 RLS/RPC) */}
-          <section className="h-full min-h-0 flex flex-col overflow-hidden">
+        {/* View Switcher Container */}
+        <main className="flex-1 min-h-0 overflow-hidden relative">
+          {activeTab === 'chat' ? (
+            <GeminiChatbot />
+          ) : (
             <LoginAuditLog
               refreshTrigger={refreshAuditTrigger}
               currentUserEmail={session.user.email}
             />
-          </section>
-
-          {/* Right Column: Gemini Chatbot (Task 3 + Task 1 Edge Function) */}
-          <section className="h-full min-h-0 flex flex-col overflow-hidden">
-            <GeminiChatbot />
-          </section>
-        </div>
-      </main>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
