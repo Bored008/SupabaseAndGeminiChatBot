@@ -333,4 +333,18 @@ export function FileTextIcon({ className = 'w-5 h-5', ...props }) {
   );
 }
 
+// Official 4-color Gmail SVG icon
+export function GmailIcon({ className = 'w-4 h-4', ...props }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...props}>
+      <path fill="#4285F4" d="M2 6.5V18c0 1.1.9 2 2 2h3V9.5L2 6.5z" />
+      <path fill="#34A853" d="M17 20h3c1.1 0 2-.9 2-2V6.5L17 9.5V20z" />
+      <path fill="#EA4335" d="M17 9.5L12 13.25 7 9.5V4.5c0-.9.7-1.5 1.5-1.5.4 0 .8.1 1.1.4L12 5.5l2.4-2.1c.3-.3.7-.4 1.1-.4.8 0 1.5.6 1.5 1.5v5z" />
+      <path fill="#FBBC04" d="M7 4.5v5L2 6.5C2 5.4 2.9 4.5 4 4.5h3z" />
+      <path fill="#C5221F" d="M17 4.5h3c1.1 0 2 .9 2 2l-5 3v-5z" />
+    </svg>
+  );
+}
+
+
 

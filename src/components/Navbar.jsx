@@ -85,10 +85,9 @@ export default function Navbar({
         <div className="relative">
           <button
             onClick={() => setShowModelDropdown(!showModelDropdown)}
-            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-[#514452] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2.5 transition cursor-pointer shadow-sm whitespace-nowrap"
+            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-[#514452] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
             title="Active Google Gemini Model"
           >
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             <span>{selectedModel || 'Gemini 2.5 Flash'}</span>
             <ChevronDownIcon className="w-3.5 h-3.5 text-[#99979D]" />
           </button>

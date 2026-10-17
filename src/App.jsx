@@ -257,6 +257,7 @@ export default function App() {
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
           userEmail={session.user.email}
+          user={session.user}
         />
 
         {/* Creative Workspace */}

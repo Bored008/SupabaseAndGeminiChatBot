@@ -7,6 +7,7 @@ import {
   ShieldIcon,
   ServerIcon,
   FileTextIcon,
+  GmailIcon,
 } from './ZyriconIcons';
 import { Trash2, ShieldCheck, Layers, ExternalLink, LogOut, Code, Cpu, Mail, X } from 'lucide-react';
 import TechnicalReportModal from './TechnicalReportModal';
@@ -23,9 +24,18 @@ export default function Sidebar({
   isCollapsed,
   setIsCollapsed,
   userEmail,
+  user,
 }) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showSchemaModal, setShowSchemaModal] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+
+  // Extract email domain to fetch provider logo or fallback to Gmail icon
+  const emailDomain = userEmail?.includes('@') ? userEmail.split('@')[1].toLowerCase() : '';
+  const isGmail = emailDomain === 'gmail.com' || emailDomain === 'googlemail.com';
+  const userAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  const domainLogoUrl = emailDomain ? `https://www.google.com/s2/favicons?domain=${emailDomain}&sz=64` : null;
+  const logoSrc = userAvatar || domainLogoUrl;
 
   const handleSignOut = async () => {
     sessionStorage.clear();
@@ -277,25 +287,38 @@ export default function Sidebar({
               </button>
             </div>
 
-            {/* User Email & Logout Action */}
+            {/* User Email & Full-Width Logout Action */}
             {userEmail && (
-              <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between gap-1.5 px-0.5">
-                <div className="flex items-center gap-1.5 min-w-0 flex-1" title={userEmail}>
-                  <div className="w-6 h-6 rounded-lg bg-purple-500/15 border border-purple-500/25 flex items-center justify-center text-purple-300 flex-shrink-0">
-                    <Mail className="w-3.5 h-3.5" />
+              <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex flex-col gap-2 w-full px-0.5">
+                {/* Row 1: Gmail / Email Provider Logo beside Email */}
+                <div className="flex items-center gap-2 min-w-0 w-full" title={userEmail}>
+                  <div className="w-6 h-6 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden p-0.5">
+                    {logoSrc && !logoError ? (
+                      <img
+                        src={logoSrc}
+                        alt="email logo"
+                        className="w-full h-full object-contain rounded-sm"
+                        onError={() => setLogoError(true)}
+                      />
+                    ) : isGmail ? (
+                      <GmailIcon className="w-3.5 h-3.5" />
+                    ) : (
+                      <Mail className="w-3.5 h-3.5 text-purple-300" />
+                    )}
                   </div>
-                  <span className="text-[11px] font-mono text-slate-300 truncate font-medium">
+                  <span className="text-[11px] font-mono text-slate-300 truncate font-medium flex-1">
                     {userEmail}
                   </span>
                 </div>
 
+                {/* Row 2: Full Sidebar Width Logout Button with margin */}
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 hover:text-red-100 border border-red-500/25 text-[11px] font-medium transition cursor-pointer flex-shrink-0 shadow-sm"
+                  className="w-full py-1.5 sm:py-2 px-3 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 hover:text-red-100 border border-red-500/25 text-xs font-medium transition duration-150 cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
                   title="Sign out of Zyricon"
                   aria-label="Logout"
                 >
-                  <LogOut className="w-3 h-3" />
+                  <LogOut className="w-3.5 h-3.5" />
                   <span>Logout</span>
                 </button>
               </div>
@@ -303,9 +326,26 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* Collapsed Footer Logout */}
+        {/* Collapsed Footer Logo & Logout */}
         {isCollapsed && userEmail && (
-          <div className="mt-auto pt-2 flex flex-col items-center">
+          <div className="mt-auto pt-2 flex flex-col items-center gap-2">
+            <div
+              className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center overflow-hidden p-1"
+              title={userEmail}
+            >
+              {logoSrc && !logoError ? (
+                <img
+                  src={logoSrc}
+                  alt="email logo"
+                  className="w-full h-full object-contain rounded-sm"
+                  onError={() => setLogoError(true)}
+                />
+              ) : isGmail ? (
+                <GmailIcon className="w-4 h-4" />
+              ) : (
+                <Mail className="w-4 h-4 text-purple-300" />
+              )}
+            </div>
             <button
               onClick={handleSignOut}
               className="p-2 rounded-xl text-red-400 hover:bg-red-950/60 hover:text-red-200 border border-transparent hover:border-red-500/30 transition cursor-pointer"

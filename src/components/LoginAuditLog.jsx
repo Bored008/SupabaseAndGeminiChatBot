@@ -176,25 +176,6 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
           </div>
 
           <div className="flex items-center flex-wrap gap-2">
-            {/* Realtime Live Pill */}
-            <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition ${
-                realtimeActive
-                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                  : 'bg-purple-500/10 border-purple-500/20 text-slate-400'
-              }`}
-              title={realtimeActive ? 'Supabase Realtime Live Active' : 'Connecting to Realtime...'}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  realtimeActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'
-                }`}
-              />
-              <span className="text-[11px] font-mono font-semibold">
-                {realtimeActive ? 'Live Realtime' : 'Syncing'}
-              </span>
-            </div>
-
             {/* Export CSV Button */}
             <button
               onClick={exportToCSV}
@@ -241,10 +222,10 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
             <div>
               <p className="text-xs sm:text-sm text-slate-400 font-medium">Total Sessions</p>
               <div className="flex items-center gap-2.5 sm:gap-3 mt-1.5">
-                <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{logs.length}</p>
                 <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-sm shadow-purple-500/20">
                   <Activity className="w-5.5 h-5.5" />
                 </div>
+                <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{logs.length}</p>
               </div>
             </div>
           </div>
@@ -253,10 +234,10 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
             <div>
               <p className="text-xs sm:text-sm text-slate-400 font-medium">Unique Users</p>
               <div className="flex items-center gap-2.5 sm:gap-3 mt-1.5">
-                <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{uniqueUsersCount}</p>
                 <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/20">
                   <Users className="w-5.5 h-5.5" />
                 </div>
+                <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{uniqueUsersCount}</p>
               </div>
             </div>
           </div>
