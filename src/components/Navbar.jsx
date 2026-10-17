@@ -1,14 +1,6 @@
 import React from 'react';
 import { supabase } from '../lib/supabaseClient';
-import {
-  LogOut,
-  ChevronDown,
-  Settings,
-  Share2,
-  Bot,
-  ShieldCheck,
-  Sparkles,
-} from 'lucide-react';
+import { LogOut, Bot, ShieldCheck } from 'lucide-react';
 
 export default function Navbar({ user, activeTab, setActiveTab }) {
   const handleSignOut = async () => {
@@ -26,19 +18,15 @@ export default function Navbar({ user, activeTab, setActiveTab }) {
 
   return (
     <header className="h-16 px-4 sm:px-6 flex items-center justify-between border-b border-purple-500/10 bg-[#09050f]/80 backdrop-blur-xl select-none z-30">
-      {/* Left: Model Selector Dropdown Pill (Matching reference image) */}
+      {/* Left: Active Model Status Pill */}
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#160d26] hover:bg-[#1f1236] border border-purple-500/20 text-xs font-medium text-slate-200 transition shadow-sm cursor-pointer"
-        >
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#160d26] border border-purple-500/20 text-xs font-medium text-slate-200 shadow-sm">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>Gemini 3.5 Flash</span>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-        </button>
+        </div>
       </div>
 
-      {/* Center: IDE vs Agentic Style Segmented Mode Switcher */}
+      {/* Center: IDE / Agentic Style Segmented Mode Switcher */}
       <div className="flex items-center p-1 bg-[#120822] border border-purple-500/20 rounded-xl shadow-inner">
         <button
           onClick={() => setActiveTab('chat')}
@@ -67,19 +55,8 @@ export default function Navbar({ user, activeTab, setActiveTab }) {
         </button>
       </div>
 
-      {/* Right: Actions & User Profile */}
-      <div className="flex items-center gap-2.5">
-        {/* Configuration Pill */}
-        <button
-          type="button"
-          onClick={() => alert('Supabase Project: gfcovskxpnmsvwmggawl\nRLS: Enabled\nRPC: get_recent_logins\nEdge Function: gemini-chat (Active)')}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#160d26] hover:bg-[#1f1236] border border-purple-500/20 text-xs font-medium text-slate-300 transition cursor-pointer"
-          title="System Configuration"
-        >
-          <Settings className="w-3.5 h-3.5 text-slate-400" />
-          <span>Configuration</span>
-        </button>
-
+      {/* Right: User Profile & Sign Out */}
+      <div className="flex items-center gap-3">
         {/* User Pill */}
         <div className="flex items-center gap-2.5 bg-[#160d26] border border-purple-500/20 rounded-full py-1 pl-1 pr-3 shadow-inner">
           {avatarUrl ? (
@@ -101,10 +78,11 @@ export default function Navbar({ user, activeTab, setActiveTab }) {
         {/* Sign Out Button */}
         <button
           onClick={handleSignOut}
-          className="p-2 text-slate-400 hover:text-red-400 bg-[#160d26] hover:bg-red-500/10 border border-purple-500/20 hover:border-red-500/30 rounded-full transition cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-red-400 bg-[#160d26] hover:bg-red-500/10 border border-purple-500/20 hover:border-red-500/30 rounded-full transition cursor-pointer"
           title="Sign Out"
         >
           <LogOut className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Sign Out</span>
         </button>
       </div>
     </header>

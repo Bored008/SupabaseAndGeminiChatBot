@@ -13,6 +13,10 @@ export default function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [refreshAuditTrigger, setRefreshAuditTrigger] = useState(0);
 
+  // Email-scoped conversation storage state
+  const [conversations, setConversations] = useState([]);
+  const [activeConversationId, setActiveConversationId] = useState(null);
+
   // In-memory lock to eliminate React 18 StrictMode double-invoke race conditions
   const loggingLockRef = useRef(new Set());
 
@@ -21,18 +25,10 @@ export default function App() {
     if (!user || !user.id) return;
 
     const sessionKey = `logged_session_${user.id}`;
-
-    // 1. Synchronous check: sessionStorage flag
-    if (sessionStorage.getItem(sessionKey)) {
+    if (sessionStorage.getItem(sessionKey) || loggingLockRef.current.has(user.id)) {
       return;
     }
 
-    // 2. Synchronous check: in-memory lock
-    if (loggingLockRef.current.has(user.id)) {
-      return;
-    }
-
-    // Claim locks synchronously BEFORE awaiting the network insert
     loggingLockRef.current.add(user.id);
     sessionStorage.setItem(sessionKey, 'true');
 
@@ -84,6 +80,143 @@ export default function App() {
     };
   }, []);
 
+  // Load and sync conversations specifically for the currently logged-in user email
+  useEffect(() => {
+    const userEmail = session?.user?.email;
+    if (!userEmail) {
+      setConversations([]);
+      setActiveConversationId(null);
+      return;
+    }
+
+    const storageKey = `zyricon_conversations_${userEmail}`;
+    const activeKey = `zyricon_active_thread_${userEmail}`;
+
+    let saved = [];
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) saved = JSON.parse(raw);
+    } catch (e) {
+      console.error('Failed to parse saved conversations', e);
+    }
+
+    if (!Array.isArray(saved) || saved.length === 0) {
+      const initialChat = {
+        id: `conv_${Date.now()}`,
+        title: 'New Chat',
+        messages: [],
+        createdAt: Date.now(),
+      };
+      saved = [initialChat];
+      localStorage.setItem(storageKey, JSON.stringify(saved));
+      localStorage.setItem(activeKey, initialChat.id);
+      setConversations(saved);
+      setActiveConversationId(initialChat.id);
+    } else {
+      setConversations(saved);
+      const savedActive = localStorage.getItem(activeKey);
+      const exists = saved.some((c) => c.id === savedActive);
+      setActiveConversationId(exists ? savedActive : saved[0].id);
+    }
+  }, [session?.user?.email]);
+
+  // Create a new blank conversation for this user
+  const handleNewChat = () => {
+    const userEmail = session?.user?.email;
+    if (!userEmail) return;
+
+    const storageKey = `zyricon_conversations_${userEmail}`;
+    const activeKey = `zyricon_active_thread_${userEmail}`;
+
+    const newChat = {
+      id: `conv_${Date.now()}`,
+      title: 'New Chat',
+      messages: [],
+      createdAt: Date.now(),
+    };
+
+    const updated = [newChat, ...conversations];
+    setConversations(updated);
+    setActiveConversationId(newChat.id);
+    setActiveTab('chat');
+    localStorage.setItem(storageKey, JSON.stringify(updated));
+    localStorage.setItem(activeKey, newChat.id);
+  };
+
+  // Switch active conversation
+  const handleSelectConversation = (id) => {
+    const userEmail = session?.user?.email;
+    setActiveConversationId(id);
+    setActiveTab('chat');
+    if (userEmail) {
+      localStorage.setItem(`zyricon_active_thread_${userEmail}`, id);
+    }
+  };
+
+  // Delete a conversation thread
+  const handleDeleteConversation = (id) => {
+    const userEmail = session?.user?.email;
+    if (!userEmail) return;
+
+    const storageKey = `zyricon_conversations_${userEmail}`;
+    const activeKey = `zyricon_active_thread_${userEmail}`;
+
+    const remaining = conversations.filter((c) => c.id !== id);
+
+    if (remaining.length === 0) {
+      const fallbackChat = {
+        id: `conv_${Date.now()}`,
+        title: 'New Chat',
+        messages: [],
+        createdAt: Date.now(),
+      };
+      setConversations([fallbackChat]);
+      setActiveConversationId(fallbackChat.id);
+      localStorage.setItem(storageKey, JSON.stringify([fallbackChat]));
+      localStorage.setItem(activeKey, fallbackChat.id);
+    } else {
+      setConversations(remaining);
+      localStorage.setItem(storageKey, JSON.stringify(remaining));
+      if (activeConversationId === id) {
+        setActiveConversationId(remaining[0].id);
+        localStorage.setItem(activeKey, remaining[0].id);
+      }
+    }
+  };
+
+  // Save updated messages into the active conversation & auto-title
+  const handleSaveMessages = (conversationId, newMessages, promptText) => {
+    const userEmail = session?.user?.email;
+    if (!userEmail) return;
+
+    const storageKey = `zyricon_conversations_${userEmail}`;
+
+    setConversations((prev) => {
+      const updated = prev.map((conv) => {
+        if (conv.id === conversationId) {
+          let title = conv.title;
+          if ((title === 'New Chat' || !title) && promptText) {
+            title = promptText.length > 28 ? promptText.slice(0, 28) + '...' : promptText;
+          }
+          return {
+            ...conv,
+            title,
+            messages: newMessages,
+            updatedAt: Date.now(),
+          };
+        }
+        return conv;
+      });
+
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const activeConversation =
+    conversations.find((c) => c.id === activeConversationId) ||
+    conversations[0] || { id: 'temp', title: 'New Chat', messages: [] };
+
   if (loading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-[#09050f] text-slate-100 font-sans">
@@ -103,12 +236,18 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen flex bg-[#09050f] text-slate-100 font-sans overflow-hidden select-none">
-      {/* Left Collapsible Sidebar */}
+      {/* Left Collapsible Sidebar with User's Saved Chats */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        conversations={conversations}
+        activeConversationId={activeConversationId}
+        onSelectConversation={handleSelectConversation}
+        onNewChat={handleNewChat}
+        onDeleteConversation={handleDeleteConversation}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
+        userEmail={session.user.email}
       />
 
       {/* Main View Area */}
@@ -123,7 +262,11 @@ export default function App() {
         {/* View Switcher Container */}
         <main className="flex-1 min-h-0 overflow-hidden relative">
           {activeTab === 'chat' ? (
-            <GeminiChatbot />
+            <GeminiChatbot
+              key={activeConversation.id}
+              activeConversation={activeConversation}
+              onSaveMessages={handleSaveMessages}
+            />
           ) : (
             <LoginAuditLog
               refreshTrigger={refreshAuditTrigger}

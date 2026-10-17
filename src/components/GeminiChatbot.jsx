@@ -3,20 +3,14 @@ import { supabase } from '../lib/supabaseClient';
 import {
   Sparkles,
   ArrowUp,
-  Paperclip,
-  SlidersHorizontal,
-  LayoutGrid,
   Bot,
   User,
   Shield,
-  Zap,
-  Code2,
   Copy,
   Check,
   AlertCircle,
   Database,
   Cpu,
-  RefreshCw,
 } from 'lucide-react';
 
 const SUGGESTIONS = [
@@ -76,7 +70,7 @@ function FormattedMessage({ content }) {
                       setCopiedCodeIndex(index);
                       setTimeout(() => setCopiedCodeIndex(null), 2000);
                     }}
-                    className="flex items-center gap-1 hover:text-white transition py-0.5 px-2 rounded hover:bg-purple-900/30"
+                    className="flex items-center gap-1 hover:text-white transition py-0.5 px-2 rounded hover:bg-purple-900/30 cursor-pointer"
                   >
                     {copiedCodeIndex === index ? (
                       <>
@@ -110,8 +104,11 @@ function FormattedMessage({ content }) {
   return <div className="whitespace-pre-wrap leading-relaxed text-sm">{content}</div>;
 }
 
-export default function GeminiChatbot() {
-  const [messages, setMessages] = useState([]);
+export default function GeminiChatbot({
+  activeConversation,
+  onSaveMessages,
+}) {
+  const messages = activeConversation?.messages || [];
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -137,10 +134,12 @@ export default function GeminiChatbot() {
       id: `user-${Date.now()}`,
       role: 'user',
       text: textToSend,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const currentMessages = [...messages, userMsg];
+    // Immediate optimistic update to conversation
+    onSaveMessages(activeConversation.id, currentMessages, textToSend);
     setLoading(true);
 
     try {
@@ -172,11 +171,12 @@ export default function GeminiChatbot() {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
         text: botReply,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         latency: `${latency}ms`,
       };
 
-      setMessages((prev) => [...prev, assistantMsg]);
+      const finalMessages = [...currentMessages, assistantMsg];
+      onSaveMessages(activeConversation.id, finalMessages, textToSend);
     } catch (err) {
       console.error('Error invoking gemini-chat:', err);
       setError(err.message || 'Failed to reach Gemini Edge Function.');
@@ -205,20 +205,18 @@ export default function GeminiChatbot() {
       {/* Background radial violet glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Main Container */}
+      {/* Main Messages / Orb Area */}
       <div className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 sm:p-6 lg:p-8">
         {isInitialState ? (
-          /* INITIAL VIEW: Glowing Orb + Headline + Cards (Directly matching reference image) */
+          /* INITIAL VIEW: Glowing Orb + Headline + Input + 3 Feature Cards */
           <div className="flex-1 flex flex-col justify-center items-center max-w-4xl mx-auto w-full py-6">
-            {/* Floating 3D Glowing Orb */}
             <div className="zyricon-orb mb-8" />
 
-            {/* Headline */}
             <h2 className="text-2xl sm:text-4xl font-semibold text-white tracking-tight text-center mb-8">
               Ready to Create Something New?
             </h2>
 
-            {/* Prompt Pills Row */}
+            {/* Prompt Pills */}
             <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
               {SUGGESTIONS.map((item, i) => {
                 const Icon = item.icon;
@@ -235,50 +233,31 @@ export default function GeminiChatbot() {
               })}
             </div>
 
-            {/* Glowing Input Box */}
+            {/* Clean Input Card (No non-functional buttons) */}
             <div className="w-full max-w-2xl mb-10">
-              <div className="rounded-2xl bg-[#140b22]/90 border border-purple-500/25 p-4 shadow-[0_0_30px_rgba(147,51,234,0.15)] focus-within:border-purple-500/60 focus-within:ring-2 focus-within:ring-purple-500/20 transition">
-                <div className="flex items-center gap-3 mb-3">
-                  <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 animate-pulse" />
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Ask Anything..."
-                    disabled={loading}
-                    className="w-full bg-transparent text-sm sm:text-base text-slate-100 placeholder-slate-500 focus:outline-none disabled:opacity-50"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-purple-500/10 text-xs text-slate-400">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 hover:text-slate-200 transition cursor-pointer">
-                      <Paperclip className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Attach</span>
-                    </span>
-                    <span className="flex items-center gap-1.5 hover:text-slate-200 transition cursor-pointer">
-                      <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Settings</span>
-                    </span>
-                    <span className="flex items-center gap-1.5 hover:text-slate-200 transition cursor-pointer">
-                      <LayoutGrid className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Options</span>
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => handleSendMessage()}
-                    disabled={!input.trim() || loading}
-                    className="w-9 h-9 rounded-full bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition shadow-lg shadow-purple-600/30 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    <ArrowUp className="w-4 h-4 stroke-[2.5]" />
-                  </button>
-                </div>
+              <div className="rounded-2xl bg-[#140b22]/90 border border-purple-500/25 p-3.5 sm:p-4 shadow-[0_0_30px_rgba(147,51,234,0.15)] focus-within:border-purple-500/60 focus-within:ring-2 focus-within:ring-purple-500/20 transition flex items-center gap-3">
+                <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 animate-pulse" />
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask anything..."
+                  disabled={loading}
+                  className="w-full bg-transparent text-sm sm:text-base text-slate-100 placeholder-slate-500 focus:outline-none disabled:opacity-50"
+                />
+                <button
+                  onClick={() => handleSendMessage()}
+                  disabled={!input.trim() || loading}
+                  className="w-9 h-9 rounded-full bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition shadow-lg shadow-purple-600/30 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
+                  title="Send"
+                >
+                  <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+                </button>
               </div>
             </div>
 
-            {/* 3 Feature Cards (Matching the image layout!) */}
+            {/* 3 Clickable Feature Cards */}
             <div className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-4">
               {BOTTOM_CARDS.map((card, idx) => {
                 const Icon = card.icon;
@@ -310,7 +289,7 @@ export default function GeminiChatbot() {
             </div>
           </div>
         ) : (
-          /* CONVERSATION VIEW: Chat history */
+          /* CONVERSATION VIEW: Chat Messages */
           <div className="max-w-4xl mx-auto w-full space-y-5 py-4">
             {messages.map((msg) => {
               const isUser = msg.role === 'user';
@@ -361,7 +340,7 @@ export default function GeminiChatbot() {
                           {msg.latency && <span>⚡ {msg.latency}</span>}
                           <button
                             onClick={() => copyMessage(msg.text, msg.id)}
-                            className="opacity-0 group-hover:opacity-100 transition p-1 hover:text-white"
+                            className="opacity-0 group-hover:opacity-100 transition p-1 hover:text-white cursor-pointer"
                             title="Copy reply"
                           >
                             {copiedId === msg.id ? (
@@ -413,26 +392,24 @@ export default function GeminiChatbot() {
       {!isInitialState && (
         <div className="p-4 bg-[#09050f]/90 border-t border-purple-500/10 backdrop-blur-md">
           <div className="max-w-4xl mx-auto w-full">
-            <div className="rounded-2xl bg-[#140b22]/90 border border-purple-500/25 p-3.5 shadow-xl focus-within:border-purple-500/60 focus-within:ring-2 focus-within:ring-purple-500/20 transition">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask Gemini anything..."
-                  disabled={loading}
-                  className="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none disabled:opacity-50"
-                />
-                <button
-                  onClick={() => handleSendMessage()}
-                  disabled={!input.trim() || loading}
-                  className="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
-                >
-                  <ArrowUp className="w-4 h-4 stroke-[2.5]" />
-                </button>
-              </div>
+            <div className="rounded-2xl bg-[#140b22]/90 border border-purple-500/25 p-3 shadow-xl focus-within:border-purple-500/60 focus-within:ring-2 focus-within:ring-purple-500/20 transition flex items-center gap-3">
+              <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0" />
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask Gemini anything..."
+                disabled={loading}
+                className="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none disabled:opacity-50"
+              />
+              <button
+                onClick={() => handleSendMessage()}
+                disabled={!input.trim() || loading}
+                className="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
+              >
+                <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+              </button>
             </div>
           </div>
         </div>
