@@ -10,6 +10,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'audit'
+  const [selectedModel, setSelectedModel] = useState('ChatGPT v4.0');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [refreshAuditTrigger, setRefreshAuditTrigger] = useState(0);
 
@@ -257,6 +258,9 @@ export default function App() {
           user={session.user}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
+          activeConversation={activeConversation}
         />
 
         {/* View Switcher Container */}

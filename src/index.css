@@ -35,16 +35,31 @@ body {
 
 /* Floating 3D Orb */
 .zyricon-orb {
-  width: 80px;
-  height: 80px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #f0abfc 0%, #c084fc 25%, #9333ea 50%, #4c1d95 80%, #1e1035 100%);
+  position: relative;
+  background: radial-gradient(circle at 35% 30%, #f0abfc 0%, #c084fc 22%, #9333ea 48%, #581c87 75%, #180928 100%);
   box-shadow: 
-    0 0 45px rgba(168, 85, 247, 0.5),
-    0 0 90px rgba(192, 132, 252, 0.25),
-    inset 0 0 16px rgba(255, 255, 255, 0.4),
+    0 0 50px rgba(168, 85, 247, 0.45),
+    0 0 100px rgba(192, 132, 252, 0.2),
+    inset 0 2px 10px rgba(255, 255, 255, 0.5),
+    inset 0 -8px 20px rgba(30, 10, 60, 0.8),
     inset -4px -4px 12px rgba(0, 0, 0, 0.6);
   animation: orb-float 6s ease-in-out infinite, orb-pulse 4s ease-in-out infinite alternate;
+}
+
+.zyricon-orb::after {
+  content: '';
+  position: absolute;
+  top: 14%;
+  left: 24%;
+  width: 22px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 70%);
+  transform: rotate(-25deg);
+  pointer-events: none;
 }
 
 @keyframes orb-float {
