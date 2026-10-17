@@ -8,7 +8,7 @@ import {
   ServerIcon,
   FileTextIcon,
 } from './ZyriconIcons';
-import { Trash2, ShieldCheck, Layers, ExternalLink, LogOut, Code, Cpu } from 'lucide-react';
+import { Trash2, ShieldCheck, Layers, ExternalLink, LogOut, Code, Cpu, Mail, X } from 'lucide-react';
 import TechnicalReportModal from './TechnicalReportModal';
 import { supabase } from '../lib/supabaseClient';
 
@@ -277,13 +277,43 @@ export default function Sidebar({
               </button>
             </div>
 
-            {/* Email storage identity badge */}
+            {/* User Email & Logout Action */}
             {userEmail && (
-              <div className="mt-1.5 px-2 py-0.5 flex items-center justify-between text-[10px] text-[#99979D]">
-                <span className="truncate">User:</span>
-                <span className="truncate ml-1 font-mono text-purple-300">{userEmail}</span>
+              <div className="mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between gap-1.5 px-0.5">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1" title={userEmail}>
+                  <div className="w-6 h-6 rounded-lg bg-purple-500/15 border border-purple-500/25 flex items-center justify-center text-purple-300 flex-shrink-0">
+                    <Mail className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-[11px] font-mono text-slate-300 truncate font-medium">
+                    {userEmail}
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 hover:text-red-100 border border-red-500/25 text-[11px] font-medium transition cursor-pointer flex-shrink-0 shadow-sm"
+                  title="Sign out of Zyricon"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-3 h-3" />
+                  <span>Logout</span>
+                </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Collapsed Footer Logout */}
+        {isCollapsed && userEmail && (
+          <div className="mt-auto pt-2 flex flex-col items-center">
+            <button
+              onClick={handleSignOut}
+              className="p-2 rounded-xl text-red-400 hover:bg-red-950/60 hover:text-red-200 border border-transparent hover:border-red-500/30 transition cursor-pointer"
+              title={`Logout (${userEmail})`}
+              aria-label="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         )}
       </aside>

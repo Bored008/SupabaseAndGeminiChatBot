@@ -237,39 +237,46 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
 
         {/* Top 3 Telemetry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
-          <div className="zyricon-card p-4 rounded-2xl flex items-center justify-between">
+          <div className="zyricon-card p-4 sm:p-5 rounded-2xl flex items-center justify-between">
             <div>
-              <p className="text-xs text-slate-400 font-medium">Total Sessions</p>
-              <p className="text-2xl font-bold text-white mt-1">{logs.length}</p>
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-              <Activity className="w-4 h-4" />
+              <p className="text-xs sm:text-sm text-slate-400 font-medium">Total Sessions</p>
+              <div className="flex items-center gap-2.5 sm:gap-3 mt-1.5">
+                <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{logs.length}</p>
+                <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-sm shadow-purple-500/20">
+                  <Activity className="w-5.5 h-5.5" />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="zyricon-card p-4 rounded-2xl flex items-center justify-between">
+          <div className="zyricon-card p-4 sm:p-5 rounded-2xl flex items-center justify-between">
             <div>
-              <p className="text-xs text-slate-400 font-medium">Unique Users</p>
-              <p className="text-2xl font-bold text-white mt-1">{uniqueUsersCount}</p>
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-cyan-400">
-              <Users className="w-4 h-4" />
+              <p className="text-xs sm:text-sm text-slate-400 font-medium">Unique Users</p>
+              <div className="flex items-center gap-2.5 sm:gap-3 mt-1.5">
+                <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{uniqueUsersCount}</p>
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/20">
+                  <Users className="w-5.5 h-5.5" />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="zyricon-card p-4 rounded-2xl flex items-center justify-between">
+          <div className="zyricon-card p-4 sm:p-5 rounded-2xl flex items-center justify-between">
             <div>
-              <p className="text-xs text-slate-400 font-medium">Security Status</p>
-              <p className="text-sm font-semibold text-emerald-400 mt-1 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                RLS Enforced
-              </p>
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-emerald-400">
-              <Shield className="w-4 h-4" />
+              <p className="text-xs sm:text-sm text-slate-400 font-medium">Security Status</p>
+              <div className="flex items-center gap-2.5 sm:gap-3 mt-2">
+                <p className="text-sm sm:text-base font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  RLS Enforced
+                </p>
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm shadow-emerald-500/20">
+                  <Shield className="w-5 h-5" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
 
         {/* Search Bar */}
         <div className="relative mb-4">
