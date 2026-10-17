@@ -46,43 +46,123 @@
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ System Architecture & Visual Workflows
 
+### 1. High-Level Component & Cloud Topology
 ```mermaid
-graph TD
-    subgraph Client["React Client (Vite + Tailwind CSS)"]
-        UI["Zyricon Workspace (App.jsx)"]
-        Auth["Google OAuth (@supabase/supabase-js)"]
-        AuditUI["LoginAuditLog View"]
-        ChatUI["GeminiChatbot View"]
-        Sidebar["Sidebar & Thread Store"]
+flowchart TD
+    subgraph Client["Client Tier (React 18 + Vite)"]
+        direction TB
+        AppRoot["App.jsx Orchestrator"]
+        Sidebar["Sidebar.jsx (Threads & Identity)"]
+        Navbar["Navbar.jsx (Centered Switcher & Models)"]
+        AuditView["LoginAuditLog.jsx (Audit Table & Metrics)"]
+        ChatView["GeminiChatbot.jsx (AI Chat & Telemetry)"]
+        AppRoot --> Sidebar
+        AppRoot --> Navbar
+        AppRoot --> AuditView
+        AppRoot --> ChatView
     end
 
-    subgraph SupabaseCloud["Supabase Cloud Platform"]
-        AuthService["Supabase Auth Service"]
-        DB[("PostgreSQL Database (login_logs)")]
-        RLS["Row Level Security Engine"]
-        RPC["RPC Function: get_recent_logins()"]
-        EdgeFunc["Deno Edge Function: gemini-chat"]
-        Secrets["Encrypted Vault (GEMINI_API_KEY)"]
+    subgraph SupabasePlatform["Supabase Cloud Platform"]
+        direction TB
+        AuthSvc["Supabase Auth (OAuth PKCE)"]
+        PostgresDB[("PostgreSQL Database")]
+        RLSEngine{"Row Level Security (RLS)"}
+        RPCProc["RPC: get_recent_logins()"]
+        RealtimeCh["Realtime Engine (postgres_changes)"]
+        DenoEdge["Deno Edge Function (gemini-chat)"]
+        SecretVault["Encrypted Secrets (GEMINI_API_KEY)"]
+        
+        PostgresDB --- RLSEngine
+        PostgresDB --- RealtimeCh
     end
 
-    subgraph GoogleAPIs["Google APIs"]
-        GoogleOAuth["Google OAuth 2.0"]
-        GeminiAPI["Google Gemini 2.5 Flash REST API"]
+    subgraph ExternalServices["External Cloud APIs"]
+        GoogleAuth["Google OAuth 2.0 Accounts"]
+        GeminiFlash["Google Gemini 2.5 Flash API"]
     end
 
-    Auth -->|1. OAuth PKCE Flow| AuthService
-    AuthService <-->|2. Token Exchange| GoogleOAuth
-    Auth -->|3. Record Verified Login| DB
-    DB --- RLS
-    AuditUI -->|4. Query Logs via RPC| RPC
-    RPC -->|5. Security Invoker Query| DB
-    ChatUI -->|6. POST /functions/v1/gemini-chat| EdgeFunc
-    EdgeFunc -->|7. Access Secret Key| Secrets
-    EdgeFunc -->|8. POST /v1beta/models/...:generateContent| GeminiAPI
-    GeminiAPI -->>|9. Return AI Response| EdgeFunc
-    EdgeFunc -->>|10. Stream/JSON Response| ChatUI
+    %% Auth & User Journey
+    AppRoot -->|"1. Initiate OAuth"| AuthSvc
+    AuthSvc <-->|"2. Token Exchange"| GoogleAuth
+    AppRoot -->|"3. Guarded Session Insert"| RLSEngine
+    RLSEngine -->|"4. Validated Insert (login_logs)"| PostgresDB
+    RealtimeCh -.->|"5. Broadcast INSERT Event"| AuditView
+    AuditView -->|"6. Query Logs via RPC"| RPCProc
+    RPCProc -->|"7. Security Invoker Query"| PostgresDB
+
+    %% AI Journey
+    ChatView -->|"8. POST prompt + history"| DenoEdge
+    DenoEdge -->|"9. Retrieve Secret"| SecretVault
+    DenoEdge -->|"10. POST /v1beta/models/gemini-2.5-flash"| GeminiFlash
+    GeminiFlash -->>|"11. AI Response"| DenoEdge
+    DenoEdge -->>|"12. Formatted Markdown Response"| ChatView
+```
+
+### 2. Authentication, Duplicate-Guard & Audit Logging Workflow
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User Browser
+    participant App as App.jsx (React Root)
+    participant Auth as Supabase Auth (OAuth)
+    participant DB as PostgreSQL (public.login_logs)
+    participant RPC as RPC (get_recent_logins)
+    participant Audit as LoginAuditLog Component
+
+    User->>App: Clicks "Sign in with Google"
+    App->>Auth: signInWithOAuth({ provider: 'google' })
+    Auth->>User: Redirects to Google consent screen
+    User->>Auth: Approves permissions & redirects back
+    Auth->>App: onAuthStateChange('SIGNED_IN', session)
+    
+    rect rgb(30, 20, 45)
+    Note over App: Client Duplicate Prevention Guard
+    alt Session is NOT in memory Set AND NOT in sessionStorage
+        App->>App: Add user_id to in-memory lock Set
+        App->>App: Set sessionStorage('logged_session_[user_id]')
+        App->>DB: INSERT into public.login_logs (user_id, email, full_name, avatar_url)
+        Note over DB: Evaluated against RLS Policy:<br/>"Users can insert own login" (auth.uid() = user_id)
+        DB-->>App: Insert Confirmed
+    else Session already logged
+        App->>App: Skip duplicate DB write (React 18 StrictMode / Token refresh)
+    end
+    end
+
+    Audit->>RPC: supabase.rpc('get_recent_logins')
+    RPC->>DB: SELECT * FROM login_logs ORDER BY logged_in_at DESC LIMIT 50
+    DB-->>RPC: Returns verified audit log dataset
+    RPC-->>Audit: Populates real-time table, search filters & metrics
+```
+
+### 3. Serverless Edge Computing & Gemini AI Pipeline
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User
+    participant ChatUI as GeminiChatbot.jsx
+    participant Edge as Deno Edge Function (gemini-chat)
+    participant Vault as Supabase Secrets Vault
+    participant Gemini as Google Gemini 2.5 Flash API
+
+    User->>ChatUI: Types prompt (or clicks Preset Topic)
+    ChatUI->>ChatUI: Optimistically appends message & starts stopwatch
+    ChatUI->>Edge: POST /functions/v1/gemini-chat (messages, model, temperature)
+    
+    rect rgb(20, 30, 45)
+    Note over Edge: Serverless Deno Edge Execution
+    Edge->>Edge: Handle CORS OPTIONS preflight
+    Edge->>Vault: Read Deno.env.get('GEMINI_API_KEY')
+    Vault-->>Edge: Secure API Key
+    Edge->>Gemini: POST /v1beta/models/gemini-2.5-flash:generateContent
+    Gemini-->>Edge: 200 OK (candidates, content, safetyRatings)
+    Edge-->>ChatUI: JSON payload with generated markdown
+    end
+
+    ChatUI->>ChatUI: Records response latency (e.g., 620ms)
+    ChatUI->>ChatUI: Renders markdown, syntax highlighted code, and copy actions
+    ChatUI->>ChatUI: Syncs conversation to localStorage (keyed by user email)
 ```
 
 ---
