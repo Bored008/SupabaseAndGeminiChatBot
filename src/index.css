@@ -110,6 +110,7 @@ body {
 
 .zyricon-ambient-glow {
   background: radial-gradient(84.86% 109.62% at 91% 14%, #55405c, rgba(56, 35, 62, 0.5) 53%, rgba(22, 13, 28, 0));
+  background-repeat: no-repeat;
 }
 
 .zyricon-composer-box {

@@ -262,7 +262,7 @@ export default function App() {
         {/* Creative Workspace */}
         <div className="flex-1 my-0 sm:my-1.5 sm:mr-1.5 rounded-none sm:rounded-[22px] md:rounded-[28px] bg-[#100C13] overflow-hidden flex flex-col relative zyricon-workspace-bg">
           {/* Ambient Glow Radial Overlay */}
-          <div className="zyricon-ambient-glow absolute top-0 left-0 right-0 h-[36rem] pointer-events-none z-0" />
+          <div className="zyricon-ambient-glow absolute inset-0 w-full h-full pointer-events-none z-0" />
 
           {/* Workspace Toolbar (Figma: Height 112px) */}
           <Navbar

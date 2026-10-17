@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="h-screen w-screen flex items-center justify-center p-4 bg-[#030303] text-[#F4F2F5] relative overflow-hidden font-sans select-none">
       {/* Background ambient purple glow */}
-      <div className="zyricon-ambient-glow absolute top-0 left-0 right-0 h-[56.25rem] pointer-events-none" />
+      <div className="zyricon-ambient-glow absolute inset-0 w-full h-full pointer-events-none" />
 
       <div className="w-full max-w-md bg-[#100C13] border border-[#514452] rounded-[36px] p-8 sm:p-10 shadow-2xl relative z-10 zyricon-workspace-bg">
         {/* Luminous AI Orb & Branding */}
