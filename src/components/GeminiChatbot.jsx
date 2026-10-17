@@ -89,6 +89,81 @@ function FormattedMessage({ content }) {
   return <div className="whitespace-pre-wrap leading-relaxed">{content}</div>;
 }
 
+const ChatMessage = React.memo(({ msg }) => {
+  const [copied, setCopied] = useState(false);
+  const isUser = msg.role === 'user';
+
+  const copyResponse = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div
+      className={`flex items-start gap-3 group ${
+        isUser ? 'flex-row-reverse' : 'flex-row'
+      }`}
+    >
+      <div
+        className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-semibold shadow-md ${
+          isUser
+            ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white shadow-indigo-500/20 ring-1 ring-white/20'
+            : 'bg-slate-800/90 text-purple-400 border border-purple-500/30'
+        }`}
+      >
+        {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+      </div>
+
+      <div
+        className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed relative ${
+          isUser
+            ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-tr-none shadow-lg shadow-indigo-600/15'
+            : 'bg-slate-900/70 text-slate-100 rounded-tl-none border border-white/5 shadow-inner'
+        }`}
+      >
+        <FormattedMessage content={msg.text} />
+
+        <div
+          className={`mt-2 pt-1 border-t flex items-center justify-between text-[10px] font-mono ${
+            isUser
+              ? 'border-indigo-400/30 text-indigo-200'
+              : 'border-white/5 text-slate-400'
+          }`}
+        >
+          <span>
+            {msg.timestamp
+              ? new Date(msg.timestamp).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : ''}
+          </span>
+
+          {!isUser && (
+            <div className="flex items-center gap-2">
+              {msg.latency && (
+                <span className="text-slate-400">⚡ {msg.latency}</span>
+              )}
+              <button
+                onClick={() => copyResponse(msg.text)}
+                className="opacity-0 group-hover:opacity-100 transition p-1 hover:text-white"
+                title="Copy message"
+              >
+                {copied ? (
+                  <Check className="w-3 h-3 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3 h-3" />
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function GeminiChatbot() {
   const [messages, setMessages] = useState([
     {
@@ -101,7 +176,6 @@ export default function GeminiChatbot() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [copiedMessageId, setCopiedMessageId] = useState(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -181,12 +255,6 @@ export default function GeminiChatbot() {
     }
   };
 
-  const copyResponse = (text, id) => {
-    navigator.clipboard.writeText(text);
-    setCopiedMessageId(id);
-    setTimeout(() => setCopiedMessageId(null), 2000);
-  };
-
   return (
     <div className="glass-panel rounded-2xl flex flex-col h-full shadow-2xl overflow-hidden ring-1 ring-white/5 transition-all">
       {/* Header */}
@@ -229,73 +297,9 @@ export default function GeminiChatbot() {
 
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-5 space-y-4">
-        {messages.map((msg) => {
-          const isUser = msg.role === 'user';
-          return (
-            <div
-              key={msg.id}
-              className={`flex items-start gap-3 group ${
-                isUser ? 'flex-row-reverse' : 'flex-row'
-              }`}
-            >
-              <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-semibold shadow-md ${
-                  isUser
-                    ? 'bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white shadow-indigo-500/20 ring-1 ring-white/20'
-                    : 'bg-slate-800/90 text-purple-400 border border-purple-500/30'
-                }`}
-              >
-                {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-              </div>
-
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed relative ${
-                  isUser
-                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-tr-none shadow-lg shadow-indigo-600/15'
-                    : 'bg-slate-900/70 text-slate-100 rounded-tl-none border border-white/5 shadow-inner'
-                }`}
-              >
-                <FormattedMessage content={msg.text} />
-
-                <div
-                  className={`mt-2 pt-1 border-t flex items-center justify-between text-[10px] font-mono ${
-                    isUser
-                      ? 'border-indigo-400/30 text-indigo-200'
-                      : 'border-white/5 text-slate-400'
-                  }`}
-                >
-                  <span>
-                    {msg.timestamp
-                      ? new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                      : ''}
-                  </span>
-
-                  {!isUser && (
-                    <div className="flex items-center gap-2">
-                      {msg.latency && (
-                        <span className="text-slate-400">⚡ {msg.latency}</span>
-                      )}
-                      <button
-                        onClick={() => copyResponse(msg.text, msg.id)}
-                        className="opacity-0 group-hover:opacity-100 transition p-1 hover:text-white"
-                        title="Copy message"
-                      >
-                        {copiedMessageId === msg.id ? (
-                          <Check className="w-3 h-3 text-emerald-400" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {messages.map((msg) => (
+          <ChatMessage key={msg.id} msg={msg} />
+        ))}
 
         {loading && (
           <div className="flex items-start gap-3">
