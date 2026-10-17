@@ -131,25 +131,23 @@ export default function Navbar({
           <div className="flex items-center bg-[#020202] border border-purple-500/30 rounded-full p-1 sm:p-1.5 shadow-lg shadow-purple-950/40 backdrop-blur-md ring-1 ring-purple-500/15">
             <button
               onClick={() => setActiveTab('chat')}
-              className={`flex items-center gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+              className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
                 activeTab === 'chat'
                   ? 'bg-gradient-to-r from-purple-700 to-purple-600 text-white shadow-md shadow-purple-900/50 border border-purple-400/30'
                   : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5'
               }`}
             >
-              <Cpu className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${activeTab === 'chat' ? 'text-cyan-300' : 'text-[#99979D]'}`} />
               <span className="whitespace-nowrap tracking-wide">Gemini Chat</span>
             </button>
 
             <button
               onClick={() => setActiveTab('audit')}
-              className={`flex items-center gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+              className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
                 activeTab === 'audit'
                   ? 'bg-gradient-to-r from-purple-700 to-purple-600 text-white shadow-md shadow-purple-900/50 border border-purple-400/30'
                   : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5'
               }`}
             >
-              <ShieldCheck className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${activeTab === 'audit' ? 'text-purple-200' : 'text-[#99979D]'}`} />
               <span className="whitespace-nowrap tracking-wide">Audit Log</span>
             </button>
           </div>
