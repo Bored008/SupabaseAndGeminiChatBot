@@ -6,11 +6,13 @@ import Sidebar from './components/Sidebar';
 import LoginAuditLog from './components/LoginAuditLog';
 import GeminiChatbot from './components/GeminiChatbot';
 
+import orbImg from './assets/zyricon-orb.png';
+
 export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'audit'
-  const [selectedModel, setSelectedModel] = useState('ChatGPT v4.0');
+  const [selectedModel, setSelectedModel] = useState('Gemini 2.5 Flash');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [refreshAuditTrigger, setRefreshAuditTrigger] = useState(0);
 
@@ -220,11 +222,15 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#09050f] text-slate-100 font-sans">
-        <div className="flex flex-col items-center gap-4">
-          <div className="zyricon-orb" />
-          <p className="text-xs text-purple-300 font-medium tracking-wide animate-pulse">
-            Loading Workspace...
+      <div className="h-screen w-screen flex items-center justify-center bg-[#030303] text-[#F4F2F5] font-sans">
+        <div className="flex flex-col items-center gap-5">
+          <img
+            src={orbImg}
+            alt="Zyricon AI"
+            className="w-20 h-20 object-cover rounded-full zyricon-orb-glow animate-pulse"
+          />
+          <p className="text-sm text-[#99979D] font-normal tracking-wide">
+            Loading Zyricon AI Workspace...
           </p>
         </div>
       </div>
@@ -236,48 +242,54 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen w-screen flex bg-[#09050f] text-slate-100 font-sans overflow-hidden select-none">
-      {/* Left Collapsible Sidebar with User's Saved Chats */}
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        conversations={conversations}
-        activeConversationId={activeConversationId}
-        onSelectConversation={handleSelectConversation}
-        onNewChat={handleNewChat}
-        onDeleteConversation={handleDeleteConversation}
-        isCollapsed={isSidebarCollapsed}
-        setIsCollapsed={setIsSidebarCollapsed}
-        userEmail={session.user.email}
-      />
-
-      {/* Main View Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Top Navbar with IDE/Agentic Mode Switcher */}
-        <Navbar
-          user={session.user}
+    <div className="h-screen w-screen bg-[#030303] text-[#F4F2F5] font-sans flex items-center justify-center p-0 sm:p-2 md:p-2.5 overflow-hidden select-none">
+      {/* Outer Application Shell */}
+      <div className="w-full h-full max-w-[2048px] rounded-none sm:rounded-[28px] md:rounded-[36px] border-0 sm:border border-[#A193AA]/40 bg-[#030303] flex overflow-hidden relative shadow-2xl">
+        {/* Left Sidebar */}
+        <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          activeConversation={activeConversation}
+          conversations={conversations}
+          activeConversationId={activeConversationId}
+          onSelectConversation={handleSelectConversation}
+          onNewChat={handleNewChat}
+          onDeleteConversation={handleDeleteConversation}
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+          userEmail={session.user.email}
         />
 
-        {/* View Switcher Container */}
-        <main className="flex-1 min-h-0 overflow-hidden relative">
-          {activeTab === 'chat' ? (
-            <GeminiChatbot
-              key={activeConversation.id}
-              activeConversation={activeConversation}
-              onSaveMessages={handleSaveMessages}
-            />
-          ) : (
-            <LoginAuditLog
-              refreshTrigger={refreshAuditTrigger}
-              currentUserEmail={session.user.email}
-            />
-          )}
-        </main>
+        {/* Creative Workspace */}
+        <div className="flex-1 my-0 sm:my-1.5 sm:mr-1.5 rounded-none sm:rounded-[22px] md:rounded-[28px] bg-[#100C13] overflow-hidden flex flex-col relative zyricon-workspace-bg">
+          {/* Ambient Glow Radial Overlay */}
+          <div className="zyricon-ambient-glow absolute top-0 left-0 right-0 h-[36rem] pointer-events-none z-0" />
+
+          {/* Workspace Toolbar (Figma: Height 112px) */}
+          <Navbar
+            user={session.user}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            activeConversation={activeConversation}
+          />
+
+          {/* Main View Switcher Container */}
+          <main className="flex-1 min-h-0 overflow-hidden relative z-10">
+            {activeTab === 'chat' ? (
+              <GeminiChatbot
+                key={activeConversation.id}
+                activeConversation={activeConversation}
+                onSaveMessages={handleSaveMessages}
+              />
+            ) : (
+              <LoginAuditLog
+                refreshTrigger={refreshAuditTrigger}
+                currentUserEmail={session.user.email}
+              />
+            )}
+          </main>
+        </div>
       </div>
     </div>
   );

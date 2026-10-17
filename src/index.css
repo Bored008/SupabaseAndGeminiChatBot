@@ -1,23 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: dark;
+
+  /* Figma Design Specification Variables */
+  /* Colors */
+  --color-darkgray-100: #a39ba8;
+  --color-darkgray-200: #99979d;
+  --color-darkslategray: #38343d;
+  --color-dimgray-100: #524755;
+  --color-dimgray-200: #514452;
+  --color-gainsboro: #ddd6e2;
+  --color-gray-100: #2d2a32;
+  --color-gray-200: #2b282f;
+  --color-gray-300: #292a2d;
+  --color-gray-400: #29292d;
+  --color-gray-500: #2a272e;
+  --color-gray-600: #28272c;
+  --color-gray-700: #141416;
+  --color-gray-800: #100c13;
+  --color-gray-900: #030303;
+  --color-gray-1000: #020202;
+  --color-lightslategray: #a193aa;
+  --color-whitesmoke: #f4f2f5;
+
+  /* Gaps */
+  --gap-14: 0.875rem;
+  --gap-16: 1rem;
+  --gap-18: 1.125rem;
+  --gap-19: 1.187rem;
+  --gap-20: 1.25rem;
+  --gap-22: 1.375rem;
+
+  /* Paddings */
+  --padding-0: 0rem;
+  --padding-12: 0.75rem;
+  --padding-28: 1.75rem;
+  --padding-30: 1.875rem;
+  --padding-33: 2.062rem;
+
+  /* Border Radius */
+  --br-100: 100px;
+
+  /* Font */
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Font Sizes */
+  --fs-16: 1rem;
+  --fs-19: 1.188rem;
+  --fs-22: 1.375rem;
+  --fs-23: 1.438rem;
+  --fs-25: 1.562rem;
+  --fs-27: 1.688rem;
+  --fs-34: 2.125rem;
+  --fs-49: 3.063rem;
+
+  /* Borders */
+  --border-1: 1px solid var(--color-darkslategray);
+
+  /* Element Heights & Widths */
+  --height-24: 1.5rem;
+  --height-25: 1.562rem;
+  --height-40: 2.5rem;
+  --height-57: 3.562rem;
+  --height-66: 4.125rem;
+  --width-1: 0.062rem;
+  --width-24: 1.5rem;
+  --width-25: 1.562rem;
 }
 
 body {
   margin: 0;
-  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #09050f;
-  color: #f8fafc;
-  overflow: hidden;
+  line-height: normal;
+  font-family: var(--font-inter);
+  background-color: var(--color-gray-900);
+  color: var(--color-whitesmoke);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbars matching the dark purple theme */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -25,79 +95,38 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.18);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.35);
+  background: rgba(255, 255, 255, 0.24);
 }
 
-/* Floating 3D Orb */
-.zyricon-orb {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  position: relative;
-  background: radial-gradient(circle at 35% 30%, #f0abfc 0%, #c084fc 22%, #9333ea 48%, #581c87 75%, #180928 100%);
-  box-shadow: 
-    0 0 50px rgba(168, 85, 247, 0.45),
-    0 0 100px rgba(192, 132, 252, 0.2),
-    inset 0 2px 10px rgba(255, 255, 255, 0.5),
-    inset 0 -8px 20px rgba(30, 10, 60, 0.8),
-    inset -4px -4px 12px rgba(0, 0, 0, 0.6);
-  animation: orb-float 6s ease-in-out infinite, orb-pulse 4s ease-in-out infinite alternate;
+/* Gradients from Figma specification */
+.zyricon-workspace-bg {
+  background: linear-gradient(180deg, #26102d, #100b14 48%, #0d0b0f);
 }
 
-.zyricon-orb::after {
-  content: '';
-  position: absolute;
-  top: 14%;
-  left: 24%;
-  width: 22px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 70%);
-  transform: rotate(-25deg);
-  pointer-events: none;
+.zyricon-ambient-glow {
+  background: radial-gradient(84.86% 109.62% at 91% 14%, #55405c, rgba(56, 35, 62, 0.5) 53%, rgba(22, 13, 28, 0));
 }
 
-@keyframes orb-float {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-  }
-  50% {
-    transform: translateY(-8px) scale(1.02);
-  }
+.zyricon-composer-box {
+  background: linear-gradient(180deg, #211b25, #1b171f 50%, #1d1921) padding-box,
+              linear-gradient(180deg, #c1a9c5, #38323d) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0px 12px 28px rgba(0, 0, 0, 0.33);
 }
 
-@keyframes orb-pulse {
-  0% {
-    filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.4));
-  }
-  100% {
-    filter: drop-shadow(0 0 45px rgba(216, 180, 254, 0.6));
-  }
+.zyricon-premium-panel {
+  background: linear-gradient(180deg, #1c171f, #1b151f 55%, #251f29);
 }
 
-/* Zyricon glass panels */
-.zyricon-panel {
-  background: rgba(18, 10, 30, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(168, 85, 247, 0.12);
+.zyricon-send-btn {
+  background: linear-gradient(180deg, #9b48c0, #710b92);
 }
 
-.zyricon-card {
-  background: rgba(22, 13, 38, 0.6);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(168, 85, 247, 0.12);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.zyricon-card:hover {
-  background: rgba(28, 16, 48, 0.85);
-  border-color: rgba(168, 85, 247, 0.3);
-  transform: translateY(-1px);
+.zyricon-orb-glow {
+  box-shadow: 0px 0px 45px rgba(206, 121, 241, 0.24);
 }

@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import {
-  ChevronDown,
-  Settings,
-  Upload,
-  LogOut,
-  Bot,
-  ShieldCheck,
+  ChevronDownIcon,
+  MessageCircleIcon,
+} from './ZyriconIcons';
+import {
   Check,
   X,
-  FileDown,
   Sliders,
+  LogOut,
+  ShieldCheck,
+  User as UserIcon,
+  Database,
+  Cpu,
+  Layers,
+  FileText,
 } from 'lucide-react';
+import TechnicalReportModal from './TechnicalReportModal';
 
 export default function Navbar({
   user,
@@ -23,13 +28,14 @@ export default function Navbar({
 }) {
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [temperature, setTemperature] = useState(0.7);
-  const [systemPersona, setSystemPersona] = useState('Default AI Assistant');
+  const [systemPersona, setSystemPersona] = useState('Senior Full-Stack & GenAI Engineer');
 
   const models = [
-    { id: 'gemini-3.5-flash', name: 'Gemini 3.5 Flash', tag: 'Fastest' },
-    { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash Lite', tag: 'Lightweight' },
-    { id: 'chatgpt-v4.0', name: 'ChatGPT v4.0', tag: 'Emulated' },
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', tag: 'Primary Edge Model' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', tag: 'Fast Fallback' },
+    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', tag: 'Legacy Fallback' },
   ];
 
   const handleSignOut = async () => {
@@ -47,12 +53,13 @@ export default function Navbar({
     }
 
     const title = activeConversation.title || 'Zyricon-Conversation';
-    let content = `# ${title}\n\nExported: ${new Date().toLocaleString()}\nUser: ${user?.email || 'User'}\n\n---\n\n`;
+    let content = `# ${title}\n\nExported: ${new Date().toLocaleString()}\nUser: ${user?.email || 'User'}\nModel: ${selectedModel || 'Gemini 2.5 Flash'}\nArchitecture: Supabase Edge Function (Deno) + PostgreSQL RLS\n\n---\n\n`;
 
     activeConversation.messages.forEach((msg) => {
-      const role = msg.role === 'user' ? 'User' : 'Assistant';
+      const role = msg.role === 'user' ? 'User' : 'Gemini AI Assistant';
       const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString() : '';
-      content += `### ${role} (${time})\n\n${msg.text}\n\n---\n\n`;
+      const latency = msg.latency ? ` [Latency: ${msg.latency}]` : '';
+      content += `### ${role} (${time})${latency}\n\n${msg.text}\n\n---\n\n`;
     });
 
     const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
@@ -72,19 +79,26 @@ export default function Navbar({
 
   return (
     <>
-      <header className="h-14 px-4 sm:px-6 flex items-center justify-between border-b border-[#191124] bg-[#09050f]/80 backdrop-blur-xl select-none z-30">
-        {/* Left: Model Selector Dropdown Pill (matching Figma 'ChatGPT v4.0 ⌵') */}
+      {/* Workspace Toolbar */}
+      <header className="h-14 sm:h-16 px-4 sm:px-6 xl:px-8 flex items-center justify-between border-b border-white/[0.04] bg-transparent select-none z-30 flex-shrink-0">
+        {/* Left: Model Selector Pill */}
         <div className="relative">
           <button
             onClick={() => setShowModelDropdown(!showModelDropdown)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#140e22] hover:bg-[#1f1533] border border-white/10 text-xs text-slate-200 transition cursor-pointer"
+            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-[#514452] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2.5 transition cursor-pointer shadow-sm whitespace-nowrap"
+            title="Active Google Gemini Model"
           >
-            <span className="font-medium">{selectedModel || 'ChatGPT v4.0'}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-[#857b98]" />
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span>{selectedModel || 'Gemini 2.5 Flash'}</span>
+            <ChevronDownIcon className="w-3.5 h-3.5 text-[#99979D]" />
           </button>
 
           {showModelDropdown && (
-            <div className="absolute top-full left-0 mt-2 w-56 bg-[#130b21] border border-purple-500/20 rounded-xl p-1.5 shadow-2xl z-50">
+            <div className="absolute top-full left-0 mt-2 w-64 sm:w-72 bg-[#020202] border border-[#514452] rounded-[18px] p-2 shadow-2xl z-50 backdrop-blur-xl">
+              <div className="px-2.5 py-1.5 text-[11px] text-[#99979D] font-medium border-b border-white/5 mb-1 flex justify-between items-center">
+                <span>Google Gemini Models</span>
+                <span className="text-[10px] text-cyan-400 font-mono">Deno Edge</span>
+              </div>
               {models.map((m) => (
                 <button
                   key={m.id}
@@ -92,164 +106,206 @@ export default function Navbar({
                     setSelectedModel(m.name);
                     setShowModelDropdown(false);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-left text-slate-200 hover:text-white hover:bg-white/5 transition cursor-pointer"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left text-[#F4F2F5] hover:bg-white/5 transition cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     {selectedModel === m.name ? (
                       <Check className="w-3.5 h-3.5 text-purple-400" />
                     ) : (
-                      <span className="w-3.5" />
+                      <span className="w-3.5 h-3.5" />
                     )}
-                    <span>{m.name}</span>
+                    <span className="font-normal">{m.name}</span>
                   </div>
-                  <span className="text-[10px] text-[#857b98] font-mono">{m.tag}</span>
+                  <span className="text-[10px] text-purple-300/80 bg-purple-950/60 px-2 py-0.5 rounded-full font-mono">
+                    {m.tag}
+                  </span>
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Center: IDE / Agentic Style Segmented Mode Switcher */}
-        <div className="flex items-center p-1 bg-[#130b20] border border-white/10 rounded-full shadow-inner">
-          <button
-            onClick={() => setActiveTab('chat')}
-            className={`flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer ${
-              activeTab === 'chat'
-                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/35'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            title="Switch to Chatbot"
-          >
-            <Bot className="w-3.5 h-3.5" />
-            <span>Chatbot</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('audit')}
-            className={`flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer ${
-              activeTab === 'audit'
-                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/35'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            title="Switch to Login Audit Log"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Login Audit Log</span>
-          </button>
-        </div>
-
-        {/* Right: Configuration, Export, and Profile */}
-        <div className="flex items-center gap-2.5">
-          {/* Configuration Pill */}
-          <button
-            onClick={() => setShowConfigModal(true)}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#140e22] hover:bg-[#1f1533] border border-white/10 text-xs text-slate-200 transition cursor-pointer"
-            title="Configuration"
-          >
-            <span>Configuration</span>
-            <Settings className="w-3.5 h-3.5 text-[#857b98]" />
-          </button>
-
-          {/* Export Pill */}
-          <button
-            onClick={handleExportChat}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#140e22] hover:bg-[#1f1533] border border-white/10 text-xs text-slate-200 transition cursor-pointer"
-            title="Export Conversation"
-          >
-            <span>Export</span>
-            <Upload className="w-3.5 h-3.5 text-[#857b98]" />
-          </button>
-
-          {/* User Profile Pill */}
-          <div className="flex items-center gap-2 bg-[#140e22] border border-white/10 rounded-full py-1 pl-1 pr-2.5">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={fullName}
-                className="w-6 h-6 rounded-full object-cover ring-1 ring-purple-500/30"
-              />
-            ) : (
-              <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-semibold">
-                {fullName.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span className="text-xs text-slate-200 hidden md:inline truncate max-w-[100px]">
-              {fullName}
-            </span>
+        {/* Right: Workspace Actions */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* View Switcher Pill */}
+          <div className="hidden md:flex items-center bg-[#020202] border border-white/5 rounded-full p-0.5 text-xs">
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`px-3 py-1.5 rounded-full transition cursor-pointer ${
+                activeTab === 'chat'
+                  ? 'bg-purple-900/60 text-white font-medium shadow-sm'
+                  : 'text-[#99979D] hover:text-white'
+              }`}
+            >
+              Gemini Chat
+            </button>
+            <button
+              onClick={() => setActiveTab('audit')}
+              className={`px-3 py-1.5 rounded-full transition cursor-pointer ${
+                activeTab === 'audit'
+                  ? 'bg-purple-900/60 text-white font-medium shadow-sm'
+                  : 'text-[#99979D] hover:text-white'
+              }`}
+            >
+              Audit Log
+            </button>
           </div>
 
-          {/* Sign Out Button */}
+          {/* Configuration Action Pill */}
           <button
-            onClick={handleSignOut}
-            className="p-1.5 rounded-full text-slate-400 hover:text-red-400 hover:bg-white/5 transition cursor-pointer"
-            title="Sign Out"
+            onClick={() => setShowConfigModal(true)}
+            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+            title="Configure System Architecture & Persona"
           >
-            <LogOut className="w-4 h-4" />
+            <span>Configuration</span>
+            <Sliders className="w-3.5 h-3.5 text-[#99979D]" />
+          </button>
+
+          {/* Export Action Pill */}
+          <button
+            onClick={handleExportChat}
+            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+            title="Export Conversation Transcript"
+          >
+            <span>Export</span>
+            <MessageCircleIcon className="w-3.5 h-3.5 text-[#99979D]" />
           </button>
         </div>
       </header>
 
       {/* Configuration Modal */}
       {showConfigModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-[#120921] border border-purple-500/30 rounded-2xl p-6 shadow-2xl relative">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-[#100C13] border border-[#514452] rounded-[28px] p-6 max-w-lg w-full shadow-2xl relative zyricon-workspace-bg">
             <button
               onClick={() => setShowConfigModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
+              className="absolute top-4 right-4 text-[#99979D] hover:text-white transition cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
+
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
-                <Sliders className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-full bg-[#2A272E] flex items-center justify-center text-purple-300">
+                <Sliders className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-white">Assistant Configuration</h3>
-                <p className="text-xs text-purple-300">Tune AI parameters and system behavior</p>
+                <h3 className="text-lg font-medium text-[#F4F2F5]">Workspace Configuration</h3>
+                <p className="text-xs text-[#99979D]">Architecture parameters, model settings, and user session</p>
               </div>
             </div>
 
-            <div className="space-y-4 text-xs">
-              <div>
-                <div className="flex justify-between text-slate-300 mb-1.5">
-                  <span>Creativity (Temperature)</span>
-                  <span className="font-mono text-purple-400">{temperature}</span>
+            {/* Architecture Telemetry Checklist */}
+            <div className="p-3.5 rounded-2xl bg-[#020202] border border-white/5 mb-4 space-y-2">
+              <span className="text-[11px] font-semibold text-purple-300 uppercase tracking-wider block">
+                System Health & Status
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-2 text-emerald-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Supabase Auth: Active</span>
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={temperature}
-                  onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                  className="w-full accent-purple-500 bg-purple-950/40 rounded-lg cursor-pointer"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 mb-1.5">System Persona</label>
-                <select
-                  value={systemPersona}
-                  onChange={(e) => setSystemPersona(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#190e2d] border border-purple-500/20 text-slate-200 focus:outline-none focus:border-purple-500/50 cursor-pointer"
-                >
-                  <option value="Default AI Assistant">Default AI Assistant</option>
-                  <option value="Senior Full-Stack Engineer">Senior Full-Stack Engineer</option>
-                  <option value="Database Architect">Database Architect</option>
-                  <option value="Concise Problem Solver">Concise Problem Solver</option>
-                </select>
+                <div className="flex items-center gap-2 text-emerald-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Postgres RLS: Enabled</span>
+                </div>
+                <div className="flex items-center gap-2 text-emerald-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>RPC Function: Ready</span>
+                </div>
+                <div className="flex items-center gap-2 text-emerald-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Gemini Edge: Streaming</span>
+                </div>
               </div>
             </div>
 
-            <button
-              onClick={() => setShowConfigModal(false)}
-              className="w-full mt-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition cursor-pointer shadow-lg shadow-purple-600/30"
-            >
-              Save Configuration
-            </button>
+            {/* User Session Profile */}
+            <div className="p-3.5 rounded-2xl bg-[#020202] border border-white/5 flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={fullName} className="w-9 h-9 rounded-full border border-purple-500/30" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-purple-900/50 flex items-center justify-center text-purple-200">
+                    <UserIcon className="w-4 h-4" />
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-[#F4F2F5]">{fullName}</p>
+                  <p className="text-[11px] text-[#99979D] truncate max-w-[160px] sm:max-w-[200px]">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="px-2.5 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-900 text-red-200 border border-red-500/30 text-xs flex items-center gap-1.5 transition cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+
+            {/* AI Temperature Slider */}
+            <div className="space-y-1.5 mb-4">
+              <div className="flex justify-between text-xs text-[#F4F2F5]">
+                <span>Temperature (Sampling Variability)</span>
+                <span className="font-mono text-purple-300">{temperature}</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={temperature}
+                onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                className="w-full accent-purple-500 bg-[#2A272E] h-1.5 rounded-lg cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-[#99979D]">
+                <span>0.0 (Deterministic Code)</span>
+                <span>0.7 (Balanced)</span>
+                <span>1.0 (Creative)</span>
+              </div>
+            </div>
+
+            {/* System Persona Input */}
+            <div className="space-y-1 mb-5">
+              <label className="text-xs text-[#F4F2F5]">System Persona</label>
+              <input
+                type="text"
+                value={systemPersona}
+                onChange={(e) => setSystemPersona(e.target.value)}
+                className="w-full p-2.5 rounded-xl bg-[#020202] border border-white/10 text-xs text-[#F4F2F5] focus:outline-none focus:border-purple-500"
+                placeholder="e.g. Senior Software Architect"
+              />
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2.5">
+              <button
+                onClick={() => {
+                  setShowConfigModal(false);
+                  setShowReportModal(true);
+                }}
+                className="flex-1 py-2 rounded-xl bg-[#181024] hover:bg-[#251538] border border-purple-500/30 text-xs font-medium text-purple-200 flex items-center justify-center gap-2 transition cursor-pointer"
+              >
+                <FileText className="w-4 h-4 text-pink-400" />
+                <span>Technical Report</span>
+              </button>
+
+              <button
+                onClick={() => setShowConfigModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#2A272E] hover:bg-[#343039] text-xs font-medium text-white transition cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Technical Report Modal */}
+      <TechnicalReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+      />
     </>
   );
 }

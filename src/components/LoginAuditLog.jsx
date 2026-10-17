@@ -14,6 +14,9 @@ import {
   Activity,
   Shield,
   Layers,
+  Download,
+  FileJson,
+  Wifi,
 } from 'lucide-react';
 
 function getRelativeTime(dateString) {
@@ -35,6 +38,7 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [realtimeActive, setRealtimeActive] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedId, setCopiedId] = useState(null);
@@ -60,14 +64,73 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
     }
   }, []);
 
+  // Option A: Supabase Realtime channel subscription + initial fetch
   useEffect(() => {
     fetchLogs();
+
+    const channel = supabase
+      .channel('realtime_login_logs_channel')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'login_logs' },
+        (payload) => {
+          console.log('[Supabase Realtime] New login record detected:', payload);
+          fetchLogs(true);
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeActive(true);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchLogs, refreshTrigger]);
 
   const copyToClipboard = (text, id) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Option B: Export audit logs to CSV
+  const exportToCSV = () => {
+    if (!logs.length) return;
+    const headers = ['Session ID', 'Email', 'Full Name', 'Timestamp (UTC)', 'Timestamp (Local)'];
+    const rows = logs.map((log) => [
+      `"${log.id}"`,
+      `"${log.email}"`,
+      `"${(log.full_name || '').replace(/"/g, '""')}"`,
+      `"${log.logged_in_at}"`,
+      `"${new Date(log.logged_in_at).toLocaleString()}"`,
+    ]);
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `zyricon_audit_logs_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Option B: Export audit logs to JSON
+  const exportToJSON = () => {
+    if (!logs.length) return;
+    const jsonContent = JSON.stringify(logs, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `zyricon_audit_logs_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const filteredLogs = useMemo(() => {
@@ -87,9 +150,7 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
   }, [logs]);
 
   return (
-    <div className="flex flex-col h-full bg-[#09050f] text-slate-100 overflow-hidden relative">
-      {/* Background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
+    <div className="flex flex-col h-full bg-transparent text-[#F4F2F5] overflow-hidden relative">
 
       {/* Main Container */}
       <div className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
@@ -114,11 +175,53 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center flex-wrap gap-2">
+            {/* Realtime Live Pill */}
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition ${
+                realtimeActive
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                  : 'bg-purple-500/10 border-purple-500/20 text-slate-400'
+              }`}
+              title={realtimeActive ? 'Supabase Realtime Live Active' : 'Connecting to Realtime...'}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  realtimeActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'
+                }`}
+              />
+              <span className="text-[11px] font-mono font-semibold">
+                {realtimeActive ? 'Live Realtime' : 'Syncing'}
+              </span>
+            </div>
+
+            {/* Export CSV Button */}
+            <button
+              onClick={exportToCSV}
+              disabled={loading || logs.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#160d26] hover:bg-[#201338] border border-purple-500/20 text-xs font-semibold text-slate-200 transition cursor-pointer shadow-sm disabled:opacity-40"
+              title="Export all logs to CSV spreadsheet"
+            >
+              <Download className="w-3.5 h-3.5 text-purple-400" />
+              <span>CSV</span>
+            </button>
+
+            {/* Export JSON Button */}
+            <button
+              onClick={exportToJSON}
+              disabled={loading || logs.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#160d26] hover:bg-[#201338] border border-purple-500/20 text-xs font-semibold text-slate-200 transition cursor-pointer shadow-sm disabled:opacity-40"
+              title="Export all logs to JSON file"
+            >
+              <FileJson className="w-3.5 h-3.5 text-purple-400" />
+              <span>JSON</span>
+            </button>
+
+            {/* Manual Refresh Button */}
             <button
               onClick={() => fetchLogs(true)}
               disabled={loading || refreshing}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#160d26] hover:bg-[#201338] border border-purple-500/20 text-xs font-semibold text-slate-200 transition cursor-pointer shadow-sm disabled:opacity-40"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#160d26] hover:bg-[#201338] border border-purple-500/20 text-xs font-semibold text-slate-200 transition cursor-pointer shadow-sm disabled:opacity-40"
               title="Refresh Logs"
             >
               <RefreshCw
@@ -126,10 +229,11 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
                   refreshing ? 'animate-spin' : ''
                 }`}
               />
-              <span>Refresh</span>
+              <span className="hidden sm:inline">Refresh</span>
             </button>
           </div>
         </div>
+
 
         {/* Top 3 Telemetry Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">

@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 import {
-  Sparkles,
-  Plus,
-  MessageSquare,
-  Archive,
-  Library,
-  FolderPlus,
-  Folder,
-  Crown,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Trash2,
-  Check,
-  X,
-  Zap,
-} from 'lucide-react';
+  SparkleIcon,
+  PanelLeftIcon,
+  MessageCircleIcon,
+  DatabaseIcon,
+  ShieldIcon,
+  ServerIcon,
+  FileTextIcon,
+} from './ZyriconIcons';
+import { Trash2, ShieldCheck, Layers, ExternalLink, LogOut, Code, Cpu } from 'lucide-react';
+import TechnicalReportModal from './TechnicalReportModal';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Sidebar({
   activeTab,
@@ -28,314 +24,359 @@ export default function Sidebar({
   setIsCollapsed,
   userEmail,
 }) {
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showLibraryModal, setShowLibraryModal] = useState(false);
-  const [showArchivedModal, setShowArchivedModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showSchemaModal, setShowSchemaModal] = useState(false);
+
+  const handleSignOut = async () => {
+    sessionStorage.clear();
+    await supabase.auth.signOut();
+  };
+
+  const handleStartPresetChat = (prompt) => {
+    onNewChat();
+    // Dispatch custom event to seed prompt if needed
+    window.dispatchEvent(new CustomEvent('zyricon:seed_prompt', { detail: { prompt } }));
+  };
 
   return (
     <>
       <aside
-        className={`transition-all duration-300 ease-in-out flex flex-col bg-[#09050f] border-r border-[#191124] h-full select-none z-20 ${
-          isCollapsed ? 'w-16' : 'w-60 sm:w-64'
+        className={`transition-all duration-300 ease-in-out flex flex-col bg-[#030303] text-[#F4F2F5] h-full select-none z-20 flex-shrink-0 ${
+          isCollapsed
+            ? 'w-16 px-2 py-4'
+            : 'w-60 sm:w-64 lg:w-[270px] pt-4 px-3.5 pb-3 sm:pt-5 sm:px-4 sm:pb-4'
         }`}
       >
         {/* Brand Header */}
-        <div className="h-14 flex items-center justify-between px-4 border-b border-[#191124]">
-          {!isCollapsed && (
-            <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-600 via-fuchsia-500 to-indigo-500 flex items-center justify-center text-white shadow-sm shadow-purple-500/30">
-                <Sparkles className="w-3.5 h-3.5" />
+        <div className="h-10 flex items-center justify-between gap-2.5 mb-3.5 flex-shrink-0">
+          {!isCollapsed ? (
+            <div className="flex items-center gap-2.5 min-w-0">
+              {/* Circular brand emblem */}
+              <div className="w-8 h-8 rounded-full bg-[#292A2D] flex items-center justify-center flex-shrink-0">
+                <div className="w-5 h-5 rounded-full bg-[#F4F2F5] flex items-center justify-center">
+                  <SparkleIcon className="w-3.5 h-3.5 text-[#26102D]" fill="#26102D" />
+                </div>
               </div>
-              <span className="font-semibold text-sm tracking-tight text-white">Zyricon</span>
+              <div>
+                <span className="font-medium text-lg sm:text-xl tracking-tight text-[#F4F2F5] block leading-none">
+                  Zyricon
+                </span>
+                <span className="text-[10px] text-purple-400 font-mono tracking-wider">
+                  GenAI Workspace
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="mx-auto w-8 h-8 rounded-full bg-[#292A2D] flex items-center justify-center">
+              <div className="w-5 h-5 rounded-full bg-[#F4F2F5] flex items-center justify-center">
+                <SparkleIcon className="w-3.5 h-3.5 text-[#26102D]" fill="#26102D" />
+              </div>
             </div>
           )}
 
+          {/* Sidebar Toggle Icon Button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer ${
-              isCollapsed ? 'mx-auto' : ''
+            className={`p-1.5 rounded-lg text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5 transition cursor-pointer flex-shrink-0 ${
+              isCollapsed ? 'mx-auto mt-1' : ''
             }`}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            aria-label="Toggle Sidebar"
           >
-            {isCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+            <PanelLeftIcon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </button>
         </div>
 
         {/* New Chat Button */}
-        <div className="p-3">
+        <div className="mb-3.5 flex-shrink-0">
           <button
             onClick={onNewChat}
-            className={`w-full flex items-center justify-start gap-2 py-2 px-3 rounded-xl bg-[#181126] hover:bg-[#231738] border border-white/5 text-[#cfc5e2] hover:text-white transition duration-150 cursor-pointer text-xs font-medium shadow-sm ${
+            className={`w-full flex items-center gap-2.5 py-2 sm:py-2.5 px-3 rounded-[14px] bg-[#2A272E] hover:bg-[#343039] border border-white/[0.04] text-[#F4F2F5] transition duration-150 cursor-pointer text-xs sm:text-sm font-normal shadow-sm ${
               isCollapsed ? 'justify-center px-0' : ''
             }`}
-            title="Start New Chat"
+            title="Start New Conversation"
           >
-            <div className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[10px]">
-              +
-            </div>
-            {!isCollapsed && <span>New Chat</span>}
+            <MessageCircleIcon className="w-4 h-4 text-[#F4F2F5] flex-shrink-0" />
+            {!isCollapsed && <span className="truncate">New Chat</span>}
           </button>
         </div>
 
-        {/* Navigation & Workspace List */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-2 space-y-4 text-xs">
-          {/* Features Section */}
+        {/* Navigation & Workspaces Scroll Area */}
+        <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pr-1 custom-scrollbar">
+          {/* Features Group */}
           <div>
             {!isCollapsed && (
-              <p className="px-3 text-[10px] font-semibold text-[#635b75] uppercase tracking-wider mb-1">
-                Features
+              <p className="px-2.5 text-[10.5px] font-medium text-[#99979D] uppercase tracking-wider mb-1">
+                Core Modules
               </p>
             )}
             <nav className="space-y-0.5">
+              {/* Chat Item (Task 3) */}
               <button
                 onClick={() => setActiveTab('chat')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition duration-150 cursor-pointer text-xs font-medium ${
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition duration-150 cursor-pointer text-xs sm:text-[13px] font-normal ${
                   activeTab === 'chat'
-                    ? 'bg-[#1b122c] text-white border border-purple-500/20'
-                    : 'text-[#9c91b1] hover:text-white hover:bg-white/5'
+                    ? 'bg-[#181024] text-[#F4F2F5] border border-[#2b193f]'
+                    : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03]'
                 } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                title="Chat"
+                title="Gemini Edge Chatbot (Task 3)"
               >
-                <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
-                {!isCollapsed && <span>Chat</span>}
+                <Cpu className="w-4 h-4 flex-shrink-0 text-cyan-400" />
+                {!isCollapsed && <span className="truncate">Gemini Chatbot</span>}
               </button>
 
+              {/* Login Audit Log Item (Task 2) */}
               <button
-                onClick={() => setShowArchivedModal(true)}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition duration-150 cursor-pointer text-xs font-medium text-[#9c91b1] hover:text-white hover:bg-white/5 ${
-                  isCollapsed ? 'justify-center px-0' : ''
-                }`}
-                title="Archived"
+                onClick={() => setActiveTab('audit')}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition duration-150 cursor-pointer text-xs sm:text-[13px] font-normal ${
+                  activeTab === 'audit'
+                    ? 'bg-[#181024] text-[#F4F2F5] border border-[#2b193f]'
+                    : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03]'
+                } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                title="PostgreSQL Login Audit Log (Task 2)"
               >
-                <Archive className="w-3.5 h-3.5 flex-shrink-0" />
-                {!isCollapsed && <span>Archived</span>}
+                <ShieldCheck className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                {!isCollapsed && <span className="truncate">Login Audit Log</span>}
               </button>
 
+              {/* Database & RLS Schema (Task 1) */}
               <button
-                onClick={() => setShowLibraryModal(true)}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition duration-150 cursor-pointer text-xs font-medium text-[#9c91b1] hover:text-white hover:bg-white/5 ${
+                onClick={() => setShowSchemaModal(true)}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition duration-150 cursor-pointer text-xs sm:text-[13px] font-normal text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03] ${
                   isCollapsed ? 'justify-center px-0' : ''
                 }`}
-                title="Library"
+                title="Inspect PostgreSQL RLS Policies & RPC (Task 1)"
               >
-                <Library className="w-3.5 h-3.5 flex-shrink-0" />
-                {!isCollapsed && <span>Library</span>}
+                <DatabaseIcon className="w-4 h-4 flex-shrink-0 text-emerald-400" />
+                {!isCollapsed && <span className="truncate">PostgreSQL Schema & RLS</span>}
+              </button>
+
+              {/* Technical Report Modal */}
+              <button
+                onClick={() => setShowReportModal(true)}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition duration-150 cursor-pointer text-xs sm:text-[13px] font-normal text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03] ${
+                  isCollapsed ? 'justify-center px-0' : ''
+                }`}
+                title="View Technical Submission Report"
+              >
+                <FileTextIcon className="w-4 h-4 flex-shrink-0 text-pink-400" />
+                {!isCollapsed && <span className="truncate">Technical Report</span>}
               </button>
             </nav>
+
+            {/* Subtle Divider */}
+            <div className="h-[1px] bg-[#141416] my-2.5" />
           </div>
 
-          {/* Workspaces Section */}
+          {/* Workspaces Group */}
           <div>
             {!isCollapsed && (
-              <div className="flex items-center justify-between px-3 mb-1">
-                <p className="text-[10px] font-semibold text-[#635b75] uppercase tracking-wider">
-                  Workspaces
-                </p>
-                <span className="text-[10px] font-mono text-purple-400">
-                  {conversations?.length || 0}
-                </span>
-              </div>
+              <p className="px-2.5 text-[10.5px] font-medium text-[#99979D] uppercase tracking-wider mb-1">
+                Conversations
+              </p>
             )}
 
-            <button
-              onClick={onNewChat}
-              className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg transition duration-150 cursor-pointer text-xs font-medium text-[#9c91b1] hover:text-white hover:bg-white/5 mb-1 ${
-                isCollapsed ? 'justify-center px-0' : ''
-              }`}
-              title="New Project"
-            >
-              <FolderPlus className="w-3.5 h-3.5 flex-shrink-0 text-purple-400" />
-              {!isCollapsed && <span>New Project</span>}
-            </button>
-
-            {/* Email-scoped conversation threads */}
-            {!isCollapsed && (
-              <div className="space-y-0.5">
-                {(!conversations || conversations.length === 0) ? (
-                  <p className="px-3 py-1.5 text-[11px] text-[#635b75] italic">
-                    No conversations yet
-                  </p>
-                ) : (
-                  conversations.map((conv) => {
-                    const isActive = activeTab === 'chat' && conv.id === activeConversationId;
-                    return (
-                      <div
-                        key={conv.id}
-                        onClick={() => {
-                          onSelectConversation(conv.id);
-                          setActiveTab('chat');
-                        }}
-                        className={`group flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition duration-150 cursor-pointer ${
-                          isActive
-                            ? 'bg-[#1b122c] text-white border border-purple-500/20'
-                            : 'text-[#9c91b1] hover:text-white hover:bg-white/5'
-                        }`}
-                        title={conv.title}
-                      >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <Folder className="w-3.5 h-3.5 flex-shrink-0 text-[#857b98] group-hover:text-purple-300 transition" />
-                          <span className="truncate">{conv.title || 'Untitled Project'}</span>
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteConversation(conv.id);
+            <div className="space-y-0.5">
+              {/* Active Conversation Threads */}
+              {!isCollapsed && (
+                <div className="space-y-0.5">
+                  {conversations && conversations.length > 0 ? (
+                    conversations.map((conv) => {
+                      const isActive = activeTab === 'chat' && conv.id === activeConversationId;
+                      return (
+                        <div
+                          key={conv.id}
+                          onClick={() => {
+                            onSelectConversation(conv.id);
+                            setActiveTab('chat');
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-[#857b98] hover:text-red-400 transition rounded"
-                          title="Delete thread"
+                          className={`group flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs sm:text-[13px] font-normal transition duration-150 cursor-pointer ${
+                            isActive
+                              ? 'bg-[#181024] text-[#F4F2F5] border border-[#2b193f]'
+                              : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03]'
+                          }`}
+                          title={conv.title}
                         >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            )}
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <MessageCircleIcon className="w-3.5 h-3.5 flex-shrink-0 text-[#99979D] group-hover:text-purple-300" />
+                            <span className="truncate">{conv.title || 'New Chat'}</span>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteConversation(conv.id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-[#99979D] hover:text-red-400 transition rounded"
+                            title="Delete thread"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })
+                  ) : null}
+
+                  {/* Real Quick-Start Engineering Context Workspaces */}
+                  {[
+                    {
+                      label: 'RLS & RPC Security',
+                      prompt: 'Explain the security model of Row Level Security (RLS) on public.login_logs and how the RPC function get_recent_logins() executes with security invoker.',
+                    },
+                    {
+                      label: 'Deno Edge & CORS',
+                      prompt: 'Review the Supabase Deno Edge Function implementation. How does it handle OPTIONS preflight CORS requests and stream Server-Sent Events (SSE)?',
+                    },
+                    {
+                      label: 'Duplicate Login Guard',
+                      prompt: 'Explain how the React client-side duplicate login guard prevents race conditions when Google OAuth completes or tokens refresh.',
+                    },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleStartPresetChat(item.prompt)}
+                      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs sm:text-[13px] font-normal text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03] transition duration-150 cursor-pointer group"
+                      title={item.prompt}
+                    >
+                      <Code className="w-3.5 h-3.5 flex-shrink-0 text-[#99979D] group-hover:text-purple-300 transition" />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Upgrade To Premium Card */}
+        {/* Project Architecture Panel (Replaces dummy upgrade panel) */}
         {!isCollapsed && (
-          <div className="p-3">
-            <div className="rounded-2xl bg-[#140b20] border border-[#241538] p-3 text-center shadow-lg">
-              <div className="w-7 h-7 rounded-full bg-[#201333] border border-purple-500/20 flex items-center justify-center mx-auto mb-2 text-purple-300">
-                <Crown className="w-3.5 h-3.5" />
+          <div className="mt-2 pt-1 flex-shrink-0">
+            <div className="zyricon-premium-panel rounded-[20px] border border-white/[0.04] p-3 sm:p-3.5 flex flex-col items-center gap-2 text-center">
+              {/* Architecture Emblem */}
+              <div className="w-8 h-8 rounded-full bg-[#2B282F] flex items-center justify-center flex-shrink-0 shadow-inner">
+                <ShieldCheck className="w-4 h-4 text-purple-300" />
               </div>
-              <h4 className="text-xs font-semibold text-white">Upgrade to premium</h4>
-              <p className="text-[10px] text-[#857b98] mt-1 leading-snug">
-                Boost productivity with seamless automation and responsive AI, built to adapt to your needs.
+
+              {/* Heading */}
+              <h4 className="text-xs sm:text-sm font-medium text-[#F4F2F5] leading-snug">
+                Unified Assessment App
+              </h4>
+
+              {/* Description */}
+              <p className="text-[10px] sm:text-[11px] text-[#99979D] leading-relaxed">
+                Supabase Auth + PostgreSQL RLS + Gemini 2.5 Flash Edge Function
               </p>
+
+              {/* View Report Button */}
               <button
-                onClick={() => setShowUpgradeModal(true)}
-                className="w-full mt-3 py-1.5 px-3 rounded-xl bg-[#231638] hover:bg-[#2f1e4b] border border-purple-500/20 text-xs font-semibold text-white transition duration-150 cursor-pointer"
+                onClick={() => setShowReportModal(true)}
+                className="w-full py-1.5 sm:py-2 px-3 rounded-xl bg-[#2A272E] hover:bg-[#343039] border border-white/[0.04] text-xs font-normal text-[#F4F2F5] transition duration-150 cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
               >
-                Upgrade
+                <span>Technical Report</span>
+                <ExternalLink className="w-3 h-3 text-purple-300" />
               </button>
             </div>
 
             {/* Email storage identity badge */}
-            <div className="mt-2.5 px-2 py-1 rounded-lg bg-[#0e0717] border border-white/5 flex items-center justify-between text-[10px]">
-              <span className="text-[#635b75] truncate">Account:</span>
-              <span className="text-purple-300 font-mono truncate ml-1 max-w-[120px]">{userEmail}</span>
-            </div>
+            {userEmail && (
+              <div className="mt-1.5 px-2 py-0.5 flex items-center justify-between text-[10px] text-[#99979D]">
+                <span className="truncate">User:</span>
+                <span className="truncate ml-1 font-mono text-purple-300">{userEmail}</span>
+              </div>
+            )}
           </div>
         )}
       </aside>
 
-      {/* Upgrade Modal */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-[#120921] border border-purple-500/30 rounded-2xl p-6 shadow-2xl relative">
-            <button
-              onClick={() => setShowUpgradeModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
-                <Crown className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-white">Zyricon Premium</h3>
-                <p className="text-xs text-purple-300">Unlock maximum AI power and storage</p>
-              </div>
-            </div>
-            <ul className="space-y-2.5 text-xs text-slate-300 my-5">
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>Unlimited Google Gemini 3.5 Flash queries</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>Per-account isolated cloud thread backups</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>Priority edge function routing with sub-500ms latency</span>
-              </li>
-            </ul>
-            <button
-              onClick={() => setShowUpgradeModal(false)}
-              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition cursor-pointer shadow-lg shadow-purple-600/30"
-            >
-              Active Workspace (Granted)
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Technical Report Modal */}
+      <TechnicalReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+      />
 
-      {/* Library Modal */}
-      {showLibraryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-[#120921] border border-purple-500/30 rounded-2xl p-6 shadow-2xl relative">
-            <button
-              onClick={() => setShowLibraryModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
-                <Library className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-white">Prompt Library</h3>
-                <p className="text-xs text-purple-300">Pre-built high performance prompts</p>
-              </div>
-            </div>
-            <div className="space-y-2.5 my-4 max-h-72 overflow-y-auto">
-              {[
-                { title: 'Code Refactoring', text: 'Analyze this code for performance bottlenecks, edge cases, and modern best practices.' },
-                { title: 'Architecture Review', text: 'Design a resilient distributed microservice architecture with caching and security.' },
-                { title: 'PostgreSQL Optimization', text: 'Provide indexing strategies and query optimizations for high-throughput tables.' },
-              ].map((item, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-[#190e2d] border border-purple-500/15">
-                  <p className="text-xs font-semibold text-white">{item.title}</p>
-                  <p className="text-[11px] text-[#9c91b1] mt-1">{item.text}</p>
+      {/* Database Schema & RLS Modal (Task 1) */}
+      {showSchemaModal && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 select-none">
+          <div className="bg-[#100C13] border border-[#514452] rounded-[28px] max-w-2xl w-full max-h-[80vh] flex flex-col shadow-2xl overflow-hidden relative zyricon-workspace-bg">
+            <div className="p-5 border-b border-white/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 flex items-center justify-center text-emerald-300">
+                  <DatabaseIcon className="w-5 h-5" />
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-base font-medium text-[#F4F2F5]">PostgreSQL Schema & RLS Policies</h3>
+                  <p className="text-xs text-[#99979D]">Task 1 Core Database Modeling (<code className="text-emerald-300">supabase/schema.sql</code>)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSchemaModal(false)}
+                className="p-1.5 text-[#99979D] hover:text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={() => setShowLibraryModal(false)}
-              className="w-full py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-white text-xs font-medium transition cursor-pointer"
-            >
-              Close Library
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Archived Modal */}
-      {showArchivedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-[#120921] border border-purple-500/30 rounded-2xl p-6 shadow-2xl relative">
-            <button
-              onClick={() => setShowArchivedModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
-                <Archive className="w-5 h-5" />
+            <div className="p-5 overflow-y-auto space-y-4 text-xs font-mono custom-scrollbar">
+              <div className="p-3.5 rounded-xl bg-[#020202] border border-[#38343D] space-y-1.5">
+                <span className="text-purple-400 font-sans font-medium text-xs block">1. Table Definition (`public.login_logs`)</span>
+                <pre className="text-[#DDD6E2] overflow-x-auto">
+{`create table if not exists public.login_logs (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  email text not null,
+  full_name text,
+  avatar_url text,
+  logged_in_at timestamptz default now() not null
+);`}
+                </pre>
               </div>
-              <div>
-                <h3 className="text-base font-semibold text-white">Archived Chats</h3>
-                <p className="text-xs text-purple-300">Archived workspaces for {userEmail}</p>
+
+              <div className="p-3.5 rounded-xl bg-[#020202] border border-[#38343D] space-y-1.5">
+                <span className="text-purple-400 font-sans font-medium text-xs block">2. Row Level Security Policies</span>
+                <pre className="text-[#DDD6E2] overflow-x-auto">
+{`-- Enable Row Level Security
+alter table public.login_logs enable row level security;
+
+-- Policy 1: Authenticated users can insert their own record
+create policy "Users can insert own login"
+on public.login_logs for insert to authenticated
+with check (auth.uid() = user_id);
+
+-- Policy 2: Authenticated users can view all logins
+create policy "Authenticated users can view logins"
+on public.login_logs for select to authenticated
+using (true);`}
+                </pre>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-[#020202] border border-[#38343D] space-y-1.5">
+                <span className="text-purple-400 font-sans font-medium text-xs block">3. Invoker RPC Function</span>
+                <pre className="text-[#DDD6E2] overflow-x-auto">
+{`create or replace function public.get_recent_logins()
+returns table (
+  id uuid,
+  email text,
+  full_name text,
+  avatar_url text,
+  logged_in_at timestamptz
+)
+language sql security invoker as $$
+  select id, email, full_name, avatar_url, logged_in_at
+  from public.login_logs
+  order by logged_in_at desc limit 50;
+$$;`}
+                </pre>
               </div>
             </div>
-            <p className="text-xs text-[#857b98] my-4 leading-relaxed">
-              No archived conversations. All active threads are synced in your primary workspace list.
-            </p>
-            <button
-              onClick={() => setShowArchivedModal(false)}
-              className="w-full py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-white text-xs font-medium transition cursor-pointer"
-            >
-              Done
-            </button>
+
+            <div className="p-4 border-t border-white/[0.06] bg-[#020202] flex justify-end">
+              <button
+                onClick={() => setShowSchemaModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#2A272E] text-xs font-medium text-white transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

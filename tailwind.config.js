@@ -7,17 +7,20 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['Geist Mono', 'SFMono-Regular', 'Menlo', 'monospace'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       colors: {
         zyricon: {
-          bg: '#09050f',
-          surface: '#11091d',
-          sidebar: '#07040c',
-          card: '#160d26',
-          border: 'rgba(168, 85, 247, 0.15)',
-          glow: 'rgba(168, 85, 247, 0.4)',
+          bg: '#000000',
+          canvas: '#13091e',
+          card: '#0f0819',
+          box: '#11091d',
+          border: 'rgba(255, 255, 255, 0.08)',
+          purpleBorder: '#351d4c',
+          pill: '#160d22',
+          pillBorder: 'rgba(255, 255, 255, 0.08)',
+          accent: '#8234e6',
+          textMuted: '#766c89',
         },
       },
     },

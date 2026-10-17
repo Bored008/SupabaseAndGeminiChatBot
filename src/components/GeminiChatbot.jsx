@@ -1,67 +1,71 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabaseClient';
 import {
-  Sparkles,
-  ArrowUp,
-  Bot,
-  User,
+  SparkleIcon,
+  MessageCircleIcon,
+  CrownIcon,
+  LinkIcon,
+  SlidersIcon,
+  OptionsIcon,
+  MicIcon,
+  ArrowUpIcon,
+  DatabaseIcon,
+  ShieldIcon,
+  ServerIcon,
+  CodeIcon,
+} from './ZyriconIcons';
+import {
   Copy,
   Check,
-  AlertCircle,
-  Image as ImageIcon,
-  Lightbulb,
-  FileText,
-  Code,
   Paperclip,
-  SlidersHorizontal,
-  LayoutGrid,
-  Mic,
-  MicOff,
   X,
-  Presentation,
+  Square,
+  MicOff,
+  AlertCircle,
+  User,
+  ShieldCheck,
+  Cpu,
 } from 'lucide-react';
+import orbImg from '../assets/zyricon-orb.png';
 
-// Top action pills above the prompt box (exactly as in Figma screenshot)
-const TOP_PILLS = [
+// Real prompt suggestions showcasing project capabilities
+const PROMPT_SUGGESTIONS = [
   {
-    label: 'Create Image',
-    icon: ImageIcon,
-    prompt: 'Create a vivid, high-resolution generative image prompt describing a futuristic glowing violet cyberpunk city.',
+    label: 'Audit Postgres RLS',
+    prompt: 'Analyze the Row Level Security (RLS) policies on public.login_logs. How do they isolate authenticated sessions?',
   },
   {
-    label: 'Brainstorm',
-    icon: Lightbulb,
-    prompt: 'Brainstorm 5 innovative, cutting-edge AI features for a modern developer workspace.',
+    label: 'Inspect Edge Function',
+    prompt: 'Explain how the Supabase Deno Edge Function securely proxies requests to Google Gemini with CORS and SSE streaming.',
   },
   {
-    label: 'Make a plan',
-    icon: FileText,
-    prompt: 'Create a comprehensive, step-by-step project execution plan for building a real-time full-stack application.',
+    label: 'Session Duplicate Guard',
+    prompt: 'Explain how the React client-side duplicate login guard prevents race conditions when Google OAuth completes.',
   },
 ];
 
-// Bottom 3 feature cards (exactly as in Figma screenshot)
-const FEATURE_CARDS = [
+// Real creation cards mapped to the core assessment engineering layers
+const CREATION_CARDS = [
   {
-    title: 'Image Generator',
-    desc: 'Create high-quality images instantly from text.',
-    badge: 'Create Image',
-    icon: ImageIcon,
-    prompt: 'Generate an artistic description and Midjourney/Gemini prompt for a hyper-realistic violet crystal artifact floating in space.',
+    title: 'Database & Security',
+    badge: 'Postgres RLS',
+    desc: 'Inspect Row Level Security policies, RPC functions, and table constraints.',
+    icon: DatabaseIcon,
+    prompt: 'Explain the Row Level Security policies on public.login_logs, why security invoker was chosen for get_recent_logins(), and how PostgreSQL enforces tenant isolation.',
   },
   {
-    title: 'AI Presentation',
-    desc: 'Turn ideas into engaging, professional presentations.',
-    badge: 'Make Slides',
-    icon: Presentation,
-    prompt: 'Outline a 5-slide executive presentation explaining the advantages of serverless edge functions and RLS database architecture.',
+    title: 'Edge Function Proxy',
+    badge: 'Deno & CORS',
+    desc: 'Review serverless Gemini proxy handlers, streaming SSE protocols, and API token security.',
+    icon: ServerIcon,
+    prompt: 'Review the Supabase Deno Edge Function implementation. How does it handle OPTIONS preflight CORS requests and stream Server-Sent Events (SSE)?',
   },
   {
-    title: 'Dev Assistant',
-    desc: 'Generate clean, production ready code in seconds.',
-    badge: 'Generate Code',
-    icon: Code,
-    prompt: 'Write clean, production-ready TypeScript code implementing a debounced auto-saving hook with error boundary support.',
+    title: 'Session & Audit Guard',
+    badge: 'Auth & Audit',
+    desc: 'Verify Google OAuth session logging, duplicate prevention, and RPC data fetching.',
+    icon: CodeIcon,
+    prompt: 'Explain how the React client-side duplicate login guard prevents race conditions when Google OAuth completes or tokens refresh in React 18 StrictMode.',
   },
 ];
 
@@ -71,7 +75,7 @@ function FormattedMessage({ content }) {
   if (content.includes('```')) {
     const parts = content.split(/(```[\s\S]*?```)/g);
     return (
-      <div className="space-y-3 text-sm leading-relaxed">
+      <div className="space-y-3 text-xs sm:text-sm leading-relaxed">
         {parts.map((part, index) => {
           if (part.startsWith('```') && part.endsWith('```')) {
             const raw = part.slice(3, -3);
@@ -82,9 +86,9 @@ function FormattedMessage({ content }) {
             return (
               <div
                 key={index}
-                className="my-3 rounded-xl bg-[#0e071a] border border-purple-500/20 overflow-hidden shadow-inner text-xs font-mono"
+                className="my-2.5 rounded-2xl bg-[#020202] border border-[#38343D] overflow-hidden shadow-inner text-xs font-mono"
               >
-                <div className="flex items-center justify-between px-3 py-1.5 bg-[#170c2a] border-b border-purple-500/10 text-slate-400">
+                <div className="flex items-center justify-between px-3.5 py-1.5 bg-[#100C13] border-b border-[#38343D] text-[#99979D]">
                   <span className="text-purple-300 font-semibold">{lang || 'code'}</span>
                   <button
                     onClick={() => {
@@ -92,22 +96,22 @@ function FormattedMessage({ content }) {
                       setCopiedCodeIndex(index);
                       setTimeout(() => setCopiedCodeIndex(null), 2000);
                     }}
-                    className="flex items-center gap-1 hover:text-white transition py-0.5 px-2 rounded hover:bg-purple-900/30 cursor-pointer"
+                    className="flex items-center gap-1.5 hover:text-white transition py-0.5 px-2 rounded-lg hover:bg-white/5 cursor-pointer"
                   >
                     {copiedCodeIndex === index ? (
                       <>
-                        <Check className="w-3 h-3 text-emerald-400" />
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
                         <span className="text-[11px] text-emerald-400">Copied</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3 h-3" />
+                        <Copy className="w-3.5 h-3.5" />
                         <span className="text-[11px]">Copy</span>
                       </>
                     )}
                   </button>
                 </div>
-                <pre className="p-3.5 overflow-x-auto text-slate-200 leading-relaxed">
+                <pre className="p-3.5 overflow-x-auto text-[#F4F2F5] leading-relaxed">
                   <code>{code}</code>
                 </pre>
               </div>
@@ -123,15 +127,19 @@ function FormattedMessage({ content }) {
     );
   }
 
-  return <div className="whitespace-pre-wrap leading-relaxed text-sm">{content}</div>;
+  return <div className="whitespace-pre-wrap leading-relaxed text-xs sm:text-sm">{content}</div>;
 }
 
 export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
   const messages = activeConversation?.messages || [];
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streamingText, setStreamingText] = useState('');
   const [error, setError] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+
+  // Abort controller ref to cancel stream
+  const abortControllerRef = useRef(null);
 
   // Attachment state
   const [attachedFile, setAttachedFile] = useState(null);
@@ -141,11 +149,9 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef(null);
 
-  // Quick settings state
+  // Quick settings and options drawers
   const [showQuickSettings, setShowQuickSettings] = useState(false);
   const [creativity, setCreativity] = useState('Balanced');
-
-  // Quick options presets
   const [showQuickOptions, setShowQuickOptions] = useState(false);
 
   const messagesEndRef = useRef(null);
@@ -156,7 +162,26 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, loading]);
+  }, [messages, loading, streamingText]);
+
+  // Listen for seed prompt events from sidebar presets
+  useEffect(() => {
+    const handleSeed = (e) => {
+      if (e.detail?.prompt) {
+        handleSendMessage(e.detail.prompt);
+      }
+    };
+    window.addEventListener('zyricon:seed_prompt', handleSeed);
+    return () => window.removeEventListener('zyricon:seed_prompt', handleSeed);
+  }, [activeConversation]);
+
+  const handleStopGenerating = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
+  };
 
   // Voice recognition setup using Web Speech API
   const handleToggleVoice = () => {
@@ -242,6 +267,7 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
     setAttachedFile(null);
     setShowQuickSettings(false);
     setShowQuickOptions(false);
+    setStreamingText('');
 
     const userMsg = {
       id: `user-${Date.now()}`,
@@ -254,35 +280,99 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
     onSaveMessages(activeConversation.id, currentMessages, textToSend);
     setLoading(true);
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const startTime = Date.now();
+    let accumulatedText = '';
+
     try {
-      const startTime = Date.now();
-      const { data, error: functionError } = await supabase.functions.invoke('gemini-chat', {
-        body: { prompt: textToSend },
-      });
+      const endpoint = `${supabaseUrl}/functions/v1/gemini-chat`;
+
+      if (supabaseUrl && supabaseAnonKey) {
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseAnonKey,
+              'Authorization': `Bearer ${supabaseAnonKey}`,
+            },
+            body: JSON.stringify({ prompt: textToSend, stream: true }),
+          });
+
+          if (
+            response.ok &&
+            response.body &&
+            response.headers.get('content-type')?.includes('text/event-stream')
+          ) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let sseBuffer = '';
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              sseBuffer += decoder.decode(value, { stream: true });
+              const lines = sseBuffer.split('\n');
+              sseBuffer = lines.pop() || '';
+
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ')) {
+                  const dataStr = trimmed.slice(6);
+                  try {
+                    const event = JSON.parse(dataStr);
+                    if (event.type === 'TEXT_MESSAGE_DELTA' && event.delta) {
+                      accumulatedText += event.delta;
+                      setStreamingText(accumulatedText);
+                    } else if (event.type === 'RUN_ERROR') {
+                      throw new Error(event.error || 'Streaming error');
+                    }
+                  } catch (_) {}
+                }
+              }
+            }
+          }
+        } catch (streamErr) {
+          if (controller.signal.aborted) {
+            console.log('Stream stopped by user.');
+          } else {
+            console.warn('AG-UI streaming fallback to unary:', streamErr);
+          }
+        }
+      }
+
+      // Fallback: If streaming wasn't available or empty, fallback to standard unary invoke
+      if (!accumulatedText.trim() && !controller.signal.aborted) {
+        const { data, error: functionError } = await supabase.functions.invoke('gemini-chat', {
+          body: { prompt: textToSend, stream: false },
+        });
+
+        if (functionError) {
+          let detailedError = functionError.message;
+          try {
+            if (functionError.context && typeof functionError.context.json === 'function') {
+              const errorBody = await functionError.context.json();
+              if (errorBody?.error) detailedError = errorBody.error;
+            }
+          } catch (_) {}
+          throw new Error(detailedError || 'Edge Function execution failed');
+        }
+
+        if (data?.error) {
+          throw new Error(data.error);
+        }
+
+        accumulatedText = data?.reply || 'No response candidate returned by Gemini.';
+      }
 
       const latency = Date.now() - startTime;
-
-      if (functionError) {
-        let detailedError = functionError.message;
-        try {
-          if (functionError.context && typeof functionError.context.json === 'function') {
-            const errorBody = await functionError.context.json();
-            if (errorBody?.error) detailedError = errorBody.error;
-          }
-        } catch (_) {}
-        throw new Error(detailedError || 'Edge Function execution failed');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      const botReply = data?.reply || 'No response candidate returned by Gemini.';
-
       const assistantMsg = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        text: botReply,
+        text: accumulatedText || 'Generation stopped.',
         timestamp: new Date().toISOString(),
         latency: `${latency}ms`,
       };
@@ -290,10 +380,14 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
       const finalMessages = [...currentMessages, assistantMsg];
       onSaveMessages(activeConversation.id, finalMessages, textToSend);
     } catch (err) {
-      console.error('Error invoking gemini-chat:', err);
-      setError(err.message || 'Failed to reach Gemini Edge Function.');
+      if (!controller.signal.aborted) {
+        console.error('Error invoking gemini-chat:', err);
+        setError(err.message || 'Failed to reach Gemini Edge Function.');
+      }
     } finally {
       setLoading(false);
+      setStreamingText('');
+      abortControllerRef.current = null;
     }
   };
 
@@ -313,10 +407,7 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
   const isInitialState = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-full bg-[#09050f] text-slate-100 overflow-hidden relative">
-      {/* Background radial violet glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-purple-600/10 rounded-full blur-[130px] pointer-events-none" />
-
+    <div className="flex flex-col h-full overflow-hidden relative select-none">
       {/* Hidden file input for Attach button */}
       <input
         type="file"
@@ -326,279 +417,296 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
         accept=".txt,.js,.jsx,.ts,.tsx,.json,.py,.md,.html,.css,.csv,.sql"
       />
 
-      {/* Main Messages or Initial Hero Area */}
-      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 sm:p-6 lg:p-8">
+      {/* Main Workspace Scroll Body */}
+      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col custom-scrollbar">
         {isInitialState ? (
-          /* INITIAL VIEW: Floating 3D Orb + Headline + Pills + Main Prompt Box + 3 Feature Cards */
-          <div className="flex-1 flex flex-col justify-center items-center max-w-3xl mx-auto w-full py-4">
-            {/* Floating 3D Glowing Orb */}
-            <div className="zyricon-orb mb-6" />
-
-            {/* Headline */}
-            <h2 className="text-2xl sm:text-3xl font-normal text-white tracking-tight text-center mb-6">
-              Ready to Create Something New?
-            </h2>
-
-            {/* 3 Quick Action Pills (Text on left, icon on right - matching Figma) */}
-            <div className="flex flex-wrap items-center justify-center gap-2.5 mb-6">
-              {TOP_PILLS.map((pill, idx) => {
-                const Icon = pill.icon;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleSendMessage(pill.prompt)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#130b21] hover:bg-[#1f1334] border border-[#27173e] text-xs font-medium text-[#d1c8e4] hover:text-white transition duration-150 cursor-pointer shadow-sm"
-                  >
-                    <span>{pill.label}</span>
-                    <Icon className="w-3.5 h-3.5 text-purple-300" />
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Main Prompt Box Container */}
-            <div className="w-full mb-8 relative">
-              <div className="rounded-2xl bg-[#0d0718] border border-[#522588]/50 hover:border-[#7c3aed]/60 focus-within:border-[#9333ea] focus-within:shadow-[0_0_25px_rgba(147,51,234,0.22)] p-4 sm:p-5 transition-all duration-200">
-                {/* Top Input Area with Sparkle */}
-                <div className="flex items-start gap-3">
-                  <span className="text-purple-400 text-lg leading-none mt-1 select-none">✦</span>
-                  <div className="flex-1 min-w-0">
-                    <textarea
-                      rows={2}
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Ask Anything..."
-                      disabled={loading}
-                      className="w-full bg-transparent text-sm text-slate-100 placeholder-[#63557a] focus:outline-none resize-none leading-relaxed"
-                    />
-
-                    {/* Attached file chip */}
-                    {attachedFile && (
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 mt-1 rounded-lg bg-purple-950/60 border border-purple-500/30 text-xs text-purple-200">
-                        <Paperclip className="w-3 h-3 text-purple-400" />
-                        <span className="font-mono text-[11px] truncate max-w-[200px]">
-                          {attachedFile.name}
-                        </span>
-                        <span className="text-[10px] text-purple-400">({attachedFile.size})</span>
-                        <button
-                          onClick={() => setAttachedFile(null)}
-                          className="hover:text-red-400 transition cursor-pointer ml-1"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Bottom Toolbar */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-purple-500/10 text-xs">
-                  {/* Left Action Buttons */}
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-[#857b98] hover:text-white hover:bg-white/5 transition cursor-pointer"
-                      title="Attach file (.txt, .py, .js, .json, .md)"
-                    >
-                      <Paperclip className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Attach</span>
-                    </button>
-
-                    <button
-                      onClick={() => setShowQuickSettings(!showQuickSettings)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg transition cursor-pointer ${
-                        showQuickSettings
-                          ? 'text-purple-300 bg-purple-950/50'
-                          : 'text-[#857b98] hover:text-white hover:bg-white/5'
-                      }`}
-                      title="Quick Settings"
-                    >
-                      <SlidersHorizontal className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Settings</span>
-                    </button>
-
-                    <button
-                      onClick={() => setShowQuickOptions(!showQuickOptions)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg transition cursor-pointer ${
-                        showQuickOptions
-                          ? 'text-purple-300 bg-purple-950/50'
-                          : 'text-[#857b98] hover:text-white hover:bg-white/5'
-                      }`}
-                      title="Quick Templates"
-                    >
-                      <LayoutGrid className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Options</span>
-                    </button>
-                  </div>
-
-                  {/* Right Action Buttons */}
-                  <div className="flex items-center gap-2">
-                    {/* Voice Recording Button */}
-                    <button
-                      onClick={handleToggleVoice}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer ${
-                        isRecording
-                          ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/40'
-                          : 'text-[#857b98] hover:text-white hover:bg-white/5'
-                      }`}
-                      title={isRecording ? 'Listening... Click to stop' : 'Voice Input (Click to speak)'}
-                    >
-                      {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
-
-                    {/* Send Button */}
-                    <button
-                      onClick={() => handleSendMessage()}
-                      disabled={(!input.trim() && !attachedFile) || loading}
-                      className="w-8 h-8 rounded-full bg-[#8234e6] hover:bg-[#9344f6] text-white flex items-center justify-center transition shadow-lg shadow-purple-600/30 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
-                      title="Send prompt"
-                    >
-                      <ArrowUp className="w-4 h-4 stroke-[2.5]" />
-                    </button>
-                  </div>
-                </div>
+          /* INITIAL VIEW: Luminous AI Orb + Centered Welcome Heading + Prompt Suggestions + Composer + Creation Cards */
+          <div className="flex-1 flex flex-col justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[580px]">
+            {/* Upper Welcome Region */}
+            <div className="w-full flex flex-col items-center justify-center pt-2 sm:pt-4 pb-2 sm:pb-3">
+              {/* Luminous AI Orb */}
+              <div className="relative mb-3 flex items-center justify-center">
+                <img
+                  src={orbImg}
+                  alt="Zyricon AI Orb"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover zyricon-orb-glow transition-transform duration-300 hover:scale-105"
+                />
               </div>
 
-              {/* Quick Settings Drawer */}
-              {showQuickSettings && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-[#120921] border border-purple-500/30 rounded-xl p-3 shadow-xl z-20 text-xs">
-                  <p className="font-semibold text-white mb-2">Creativity Mode</p>
-                  <div className="flex items-center gap-1.5">
-                    {['Precise', 'Balanced', 'Creative'].map((mode) => (
+              {/* Welcome Heading */}
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-[32px] font-normal text-[#F4F2F5] leading-tight tracking-tight text-center max-w-2xl px-4">
+                Ready to Create Something New?
+              </h1>
+              <p className="text-xs text-[#99979D] text-center mt-1">
+                Full-Stack AI Workspace powered by Google Gemini 2.5 Flash & Supabase
+              </p>
+            </div>
+
+            {/* Lower Prompt-and-Tools Region */}
+            <div className="w-full flex flex-col gap-3 sm:gap-3.5 pb-2">
+              {/* Prompt Suggestions */}
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+                {PROMPT_SUGGESTIONS.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSendMessage(item.prompt)}
+                    className="h-8 sm:h-9 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#1b1522] border border-[#38343D] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm group"
+                  >
+                    <span>{item.label}</span>
+                    <MessageCircleIcon className="w-3.5 h-3.5 text-[#99979D] group-hover:text-purple-300 transition" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Prompt Composer */}
+              <div className="relative w-full">
+                <div className="zyricon-composer-box rounded-[22px] sm:rounded-[26px] p-4 sm:p-5 flex flex-col justify-between h-[155px] sm:h-[175px] transition-all">
+                  {/* Top: Sparkle Icon + Textarea with real context placeholder */}
+                  <div className="flex items-start gap-3">
+                    <SparkleIcon className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" fill="#A855F7" />
+                    <div className="flex-1 min-w-0">
+                      <textarea
+                        rows={2}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Ask Gemini about Supabase, RLS policies, Edge functions, or full-stack code..."
+                        disabled={loading}
+                        className="w-full bg-transparent text-xs sm:text-sm md:text-base font-normal text-[#F4F2F5] placeholder-[#A39BA8] focus:outline-none resize-none leading-relaxed tracking-normal"
+                      />
+
+                      {/* Attached File Chip */}
+                      {attachedFile && (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 mt-1 rounded-lg bg-purple-950/60 border border-purple-500/30 text-xs text-purple-200">
+                          <Paperclip className="w-3.5 h-3.5 text-purple-400" />
+                          <span className="font-mono text-xs truncate max-w-[180px]">
+                            {attachedFile.name}
+                          </span>
+                          <span className="text-[10px] text-purple-400">({attachedFile.size})</span>
+                          <button
+                            onClick={() => setAttachedFile(null)}
+                            className="hover:text-red-400 transition cursor-pointer ml-1"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom Composer Toolbar */}
+                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-white/[0.04]">
+                    {/* Left: Input Actions (Attach, divider, Settings, divider, Options) */}
+                    <div className="flex items-center gap-2.5 sm:gap-3.5">
+                      {/* Attach Button */}
                       <button
-                        key={mode}
-                        onClick={() => {
-                          setCreativity(mode);
-                          setShowQuickSettings(false);
-                        }}
-                        className={`flex-1 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
-                          creativity === mode
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-white/5 text-slate-300 hover:text-white'
-                        }`}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1.5 text-xs font-normal text-[#DDD6E2] hover:text-white transition cursor-pointer"
+                        title="Attach Context File"
                       >
-                        {mode}
+                        <LinkIcon className="w-3.5 h-3.5 text-[#DDD6E2]" />
+                        <span>Attach</span>
+                      </button>
+
+                      {/* Action Divider */}
+                      <div className="h-4 w-[1px] bg-[#524755]" />
+
+                      {/* Settings Button */}
+                      <button
+                        onClick={() => setShowQuickSettings(!showQuickSettings)}
+                        className={`flex items-center gap-1.5 text-xs font-normal transition cursor-pointer ${
+                          showQuickSettings ? 'text-purple-300' : 'text-[#DDD6E2] hover:text-white'
+                        }`}
+                        title="Quick Settings"
+                      >
+                        <SlidersIcon className="w-3.5 h-3.5" />
+                        <span>Settings</span>
+                      </button>
+
+                      {/* Action Divider */}
+                      <div className="h-4 w-[1px] bg-[#524755]" />
+
+                      {/* Options Button */}
+                      <button
+                        onClick={() => setShowQuickOptions(!showQuickOptions)}
+                        className={`flex items-center gap-1.5 text-xs font-normal transition cursor-pointer ${
+                          showQuickOptions ? 'text-purple-300' : 'text-[#DDD6E2] hover:text-white'
+                        }`}
+                        title="Quick Prompt Presets"
+                      >
+                        <OptionsIcon className="w-3.5 h-3.5" />
+                        <span>Options</span>
+                      </button>
+                    </div>
+
+                    {/* Right: Send Controls */}
+                    <div className="flex items-center gap-2">
+                      {/* Voice Input Button */}
+                      <button
+                        onClick={handleToggleVoice}
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition cursor-pointer shadow-sm ${
+                          isRecording
+                            ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/40'
+                            : 'bg-[#2D2A32] hover:bg-[#39353f] text-[#F4F2F5]'
+                        }`}
+                        title={isRecording ? 'Listening... Click to stop' : 'Voice Input (Click to speak)'}
+                      >
+                        {isRecording ? (
+                          <MicOff className="w-4 h-4" />
+                        ) : (
+                          <MicIcon className="w-4 h-4" />
+                        )}
+                      </button>
+
+                      {/* Send / Stop Button */}
+                      {loading ? (
+                        <button
+                          onClick={handleStopGenerating}
+                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center transition shadow-md shadow-red-600/30 cursor-pointer flex-shrink-0"
+                          title="Stop generating"
+                        >
+                          <Square className="w-3.5 h-3.5 fill-current" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleSendMessage()}
+                          disabled={(!input.trim() && !attachedFile) || loading}
+                          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full zyricon-send-btn hover:brightness-110 text-white flex items-center justify-center transition shadow-md shadow-purple-900/40 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
+                          title="Send prompt to Gemini"
+                        >
+                          <ArrowUpIcon className="w-4 h-4 text-white" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Settings Drawer */}
+                {showQuickSettings && (
+                  <div className="absolute bottom-full left-0 mb-2.5 w-64 bg-[#020202] border border-[#514452] rounded-[20px] p-3.5 shadow-2xl z-40 text-xs">
+                    <p className="font-medium text-[#F4F2F5] mb-2">AI Creativity Mode</p>
+                    <div className="flex items-center gap-1.5">
+                      {['Precise', 'Balanced', 'Creative'].map((mode) => (
+                        <button
+                          key={mode}
+                          onClick={() => {
+                            setCreativity(mode);
+                            setShowQuickSettings(false);
+                          }}
+                          className={`flex-1 py-1 rounded-lg text-xs font-normal transition cursor-pointer ${
+                            creativity === mode
+                              ? 'bg-[#2A272E] text-white border border-purple-500/40'
+                              : 'bg-white/5 text-[#99979D] hover:text-white'
+                          }`}
+                        >
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quick Options Drawer with real architectural presets */}
+                {showQuickOptions && (
+                  <div className="absolute bottom-full left-0 sm:left-24 mb-2.5 w-80 bg-[#020202] border border-[#514452] rounded-[20px] p-3.5 shadow-2xl z-40 text-xs space-y-1.5">
+                    <p className="font-medium text-[#F4F2F5] mb-1">Architecture Presets</p>
+                    {[
+                      'How does get_recent_logins() RPC function protect against SQL injection and bypass table SELECT permissions?',
+                      'Explain how the AG-UI SSE protocol streams token deltas from Gemini to the React frontend.',
+                      'Write a production-ready Supabase database migration adding an encrypted user preferences table.',
+                    ].map((preset, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setInput(preset);
+                          setShowQuickOptions(false);
+                        }}
+                        className="w-full text-left p-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#DDD6E2] hover:text-white transition cursor-pointer text-xs"
+                      >
+                        {preset}
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Quick Options Drawer */}
-              {showQuickOptions && (
-                <div className="absolute top-full left-0 sm:left-24 mt-2 w-80 bg-[#120921] border border-purple-500/30 rounded-xl p-3 shadow-xl z-20 text-xs space-y-2">
-                  <p className="font-semibold text-white mb-1">Quick Prompts</p>
-                  {[
-                    'Explain this concept in simple terms with an example.',
-                    'Write a clean, production-ready solution with error handling.',
-                    'Audit this architecture for potential vulnerabilities.',
-                  ].map((preset, idx) => (
-                    <button
+              {/* Creation Tools Row (Real assessment engineering modules) */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3.5 w-full">
+                {CREATION_CARDS.map((card, idx) => {
+                  const Icon = card.icon;
+                  return (
+                    <div
                       key={idx}
-                      onClick={() => {
-                        setInput(preset);
-                        setShowQuickOptions(false);
-                      }}
-                      className="w-full text-left p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer"
+                      onClick={() => handleSendMessage(card.prompt)}
+                      className="rounded-[20px] sm:rounded-[22px] bg-[#020202] hover:bg-[#140e1b] border border-[#38343D] hover:border-purple-500/40 transition-all duration-200 cursor-pointer p-3.5 sm:p-4 flex flex-col justify-between h-[130px] sm:h-[145px] group shadow-sm"
                     >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Bottom 3 Feature Cards (matching Figma screenshot) */}
-            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              {FEATURE_CARDS.map((card, idx) => {
-                const Icon = card.icon;
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => handleSendMessage(card.prompt)}
-                    className="p-4 rounded-2xl bg-[#0e071a] border border-[#201435] hover:border-[#8234e6]/50 hover:bg-[#140b24] transition-all duration-200 cursor-pointer group flex flex-col justify-between shadow-sm"
-                  >
-                    <div>
-                      {/* Top Row: Icon on left, Pill button on right */}
-                      <div className="flex items-center justify-between mb-3.5">
-                        <div className="w-7 h-7 rounded-lg bg-[#190e2b] border border-purple-500/10 flex items-center justify-center text-[#cfc5e2]">
-                          <Icon className="w-3.5 h-3.5" />
+                      {/* Top Row: Tool Emblem + Action Badge */}
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#28272C] flex items-center justify-center flex-shrink-0 group-hover:bg-[#342f3b] transition text-purple-300">
+                          <Icon className="w-4 h-4" />
                         </div>
-                        <span className="text-[10px] font-medium text-[#b6a7d4] bg-[#1d1231] px-2.5 py-1 rounded-full group-hover:bg-[#2b1a47] transition">
-                          {card.badge}
-                        </span>
+                        <div className="h-6 sm:h-6.5 px-2.5 rounded-full bg-[#29292D] group-hover:bg-[#36323d] flex items-center justify-center transition">
+                          <span className="text-[11px] font-normal text-purple-300">
+                            {card.badge}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Title */}
-                      <h4 className="text-xs font-semibold text-white group-hover:text-purple-300 transition">
-                        {card.title}
-                      </h4>
-
-                      {/* Description */}
-                      <p className="text-[11px] text-[#7a6f90] mt-1 leading-relaxed">
-                        {card.desc}
-                      </p>
+                      {/* Tool Details */}
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-xs sm:text-sm font-medium text-[#F4F2F5] group-hover:text-purple-300 transition">
+                          {card.title}
+                        </h3>
+                        <p className="text-[11px] sm:text-xs font-normal text-[#99979D] leading-snug line-clamp-2">
+                          {card.desc}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         ) : (
           /* ACTIVE CONVERSATION VIEW */
-          <div className="max-w-3xl mx-auto w-full space-y-5 py-4">
-            {messages.map((msg) => {
-              const isUser = msg.role === 'user';
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex items-start gap-3 group ${
-                    isUser ? 'flex-row-reverse' : 'flex-row'
-                  }`}
-                >
+          <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 py-4 flex-1 flex flex-col justify-between space-y-4">
+            <div className="space-y-4">
+              {messages.map((msg) => {
+                const isUser = msg.role === 'user';
+                return (
                   <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-semibold shadow-sm ${
-                      isUser
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-[#180e2a] text-purple-300 border border-purple-500/20'
+                    key={msg.id}
+                    className={`flex items-start gap-2.5 group ${
+                      isUser ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                    {isUser ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
-                  </div>
-
-                  <div
-                    className={`max-w-[85%] rounded-2xl p-4 relative ${
-                      isUser
-                        ? 'bg-purple-600 text-white rounded-tr-none shadow-md shadow-purple-600/20'
-                        : 'bg-[#120920]/90 border border-purple-500/20 text-slate-100 rounded-tl-none shadow-lg'
-                    }`}
-                  >
-                    <FormattedMessage content={msg.text} />
+                    {!isUser && (
+                      <div className="w-8 h-8 rounded-full bg-[#2A272E] border border-white/5 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 shadow-sm">
+                        <SparkleIcon className="w-4 h-4 text-purple-400" fill="#A855F7" />
+                      </div>
+                    )}
 
                     <div
-                      className={`mt-2 pt-2 border-t flex items-center justify-between text-[10px] font-mono ${
+                      className={`max-w-[85%] rounded-[20px] p-3.5 sm:p-4 relative shadow-md transition-all ${
                         isUser
-                          ? 'border-purple-400/30 text-purple-200'
-                          : 'border-purple-500/10 text-[#857b98]'
+                          ? 'bg-[#2A272E] text-[#F4F2F5] border border-white/10'
+                          : 'bg-[#020202] text-[#F4F2F5] border border-[#38343D]'
                       }`}
                     >
-                      <span>
-                        {msg.timestamp
-                          ? new Date(msg.timestamp).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : ''}
-                      </span>
-
-                      {!isUser && (
+                      <div className="flex items-center justify-between gap-3 mb-1.5">
+                        <span className="text-xs font-medium text-purple-300">
+                          {isUser ? 'You' : 'Gemini AI Assistant'}
+                        </span>
                         <div className="flex items-center gap-2">
-                          {msg.latency && <span>⚡ {msg.latency}</span>}
+                          {msg.latency && (
+                            <span className="text-[10px] text-[#99979D] font-mono">
+                              {msg.latency}
+                            </span>
+                          )}
                           <button
                             onClick={() => copyMessage(msg.text, msg.id)}
-                            className="opacity-0 group-hover:opacity-100 transition p-1 hover:text-white cursor-pointer"
-                            title="Copy reply"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-[#99979D] hover:text-white transition cursor-pointer"
+                            title="Copy text"
                           >
                             {copiedId === msg.id ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -607,92 +715,130 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
                             )}
                           </button>
                         </div>
-                      )}
+                      </div>
+
+                      <FormattedMessage content={msg.text} />
                     </div>
+
+                    {isUser && (
+                      <div className="w-8 h-8 rounded-full bg-purple-950/80 border border-purple-500/30 flex items-center justify-center text-purple-200 flex-shrink-0 mt-0.5 shadow-sm">
+                        <User className="w-4 h-4" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Streaming Assistant Response */}
+              {loading && streamingText && (
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#2A272E] border border-white/5 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 animate-pulse">
+                    <SparkleIcon className="w-4 h-4 text-purple-400" fill="#A855F7" />
+                  </div>
+                  <div className="max-w-[85%] rounded-[20px] p-3.5 sm:p-4 bg-[#020202] text-[#F4F2F5] border border-[#38343D] shadow-md">
+                    <div className="flex items-center gap-2 mb-1.5 text-xs font-medium text-cyan-300">
+                      <span>Gemini 2.5 Flash is streaming...</span>
+                    </div>
+                    <FormattedMessage content={streamingText} />
                   </div>
                 </div>
-              );
-            })}
+              )}
 
-            {loading && (
-              <div className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-lg bg-[#180e2a] text-purple-300 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-3.5 h-3.5" />
-                </div>
-                <div className="bg-[#120920]/90 border border-purple-500/20 rounded-2xl rounded-tl-none p-3.5 text-xs text-slate-300 flex items-center gap-2.5">
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce [animation-delay:0.2s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]" />
+              {/* Loading Pulse */}
+              {loading && !streamingText && (
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#2A272E] border border-white/5 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 animate-spin">
+                    <SparkleIcon className="w-4 h-4 text-purple-400" fill="#A855F7" />
                   </div>
-                  <span>Generating response...</span>
+                  <div className="p-3.5 rounded-xl bg-[#020202] border border-[#38343D] text-xs text-[#99979D] flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                    Invoking Supabase Edge Function (gemini-chat)...
+                  </div>
+                </div>
+              )}
+
+              {/* Error Message */}
+              {error && (
+                <div className="p-3.5 rounded-xl bg-red-950/50 border border-red-500/40 text-red-200 text-xs flex items-center gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Inference Error</p>
+                    <p className="mt-0.5">{error}</p>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Bottom Composer in Active View */}
+            <div className="pt-2 sticky bottom-0 z-30">
+              <div className="zyricon-composer-box rounded-[22px] p-3 sm:p-4 flex flex-col justify-between min-h-[120px]">
+                <div className="flex items-start gap-2.5">
+                  <SparkleIcon className="w-4 h-4 text-purple-400 mt-1 flex-shrink-0" fill="#A855F7" />
+                  <textarea
+                    rows={2}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask Gemini about Supabase, RLS policies, Edge functions, or full-stack code..."
+                    disabled={loading}
+                    className="w-full bg-transparent text-xs sm:text-sm font-normal text-[#F4F2F5] placeholder-[#A39BA8] focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+                  <div className="flex items-center gap-2.5 text-xs text-[#DDD6E2]">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-1 hover:text-white transition cursor-pointer"
+                    >
+                      <LinkIcon className="w-3.5 h-3.5" />
+                      <span>Attach</span>
+                    </button>
+                    <div className="h-3.5 w-[1px] bg-[#524755]" />
+                    <button
+                      onClick={() => setShowQuickSettings(!showQuickSettings)}
+                      className="flex items-center gap-1 hover:text-white transition cursor-pointer"
+                    >
+                      <SlidersIcon className="w-3.5 h-3.5" />
+                      <span>Settings</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleToggleVoice}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer ${
+                        isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-[#2D2A32] text-[#F4F2F5]'
+                      }`}
+                    >
+                      {isRecording ? <MicOff className="w-3.5 h-3.5" /> : <MicIcon className="w-3.5 h-3.5" />}
+                    </button>
+
+                    {loading ? (
+                      <button
+                        onClick={handleStopGenerating}
+                        className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center transition cursor-pointer"
+                      >
+                        <Square className="w-3 h-3 fill-current" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleSendMessage()}
+                        disabled={(!input.trim() && !attachedFile) || loading}
+                        className="w-8 h-8 rounded-full zyricon-send-btn text-white flex items-center justify-center transition disabled:opacity-30 cursor-pointer"
+                      >
+                        <ArrowUpIcon className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            )}
-
-            {error && (
-              <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-red-200">Execution Error</p>
-                  <p className="mt-0.5 leading-relaxed text-slate-300">{error}</p>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
+            </div>
           </div>
         )}
       </div>
-
-      {/* Pinned Bottom Input Bar (When in active conversation) */}
-      {!isInitialState && (
-        <div className="p-4 bg-[#09050f]/90 border-t border-[#191124] backdrop-blur-md">
-          <div className="max-w-3xl mx-auto w-full">
-            <div className="rounded-2xl bg-[#0d0718] border border-[#522588]/50 hover:border-[#7c3aed]/60 focus-within:border-[#9333ea] focus-within:shadow-[0_0_20px_rgba(147,51,234,0.2)] p-3 transition flex items-center gap-2.5">
-              <span className="text-purple-400 text-base leading-none select-none pl-1">✦</span>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask Gemini anything..."
-                disabled={loading}
-                className="w-full bg-transparent text-xs sm:text-sm text-slate-100 placeholder-[#63557a] focus:outline-none disabled:opacity-50"
-              />
-
-              {/* Voice button */}
-              <button
-                onClick={handleToggleVoice}
-                className={`p-1.5 rounded-full transition cursor-pointer ${
-                  isRecording ? 'text-red-400 animate-pulse' : 'text-[#857b98] hover:text-white'
-                }`}
-                title="Voice Input"
-              >
-                <Mic className="w-4 h-4" />
-              </button>
-
-              {/* Attach button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="p-1.5 rounded-full text-[#857b98] hover:text-white transition cursor-pointer"
-                title="Attach file"
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
-
-              {/* Send button */}
-              <button
-                onClick={() => handleSendMessage()}
-                disabled={!input.trim() || loading}
-                className="w-7 h-7 rounded-full bg-[#8234e6] hover:bg-[#9344f6] text-white flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex-shrink-0"
-              >
-                <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

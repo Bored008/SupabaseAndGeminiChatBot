@@ -48,3 +48,7 @@ as $$
   limit 50;
 $$;
 
+-- 4. Enable Supabase Realtime Replication on login_logs (Option A: Realtime)
+alter publication supabase_realtime add table public.login_logs;
+
+

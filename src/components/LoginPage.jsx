@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { AlertCircle, Shield, Database, Cpu, ArrowRight } from 'lucide-react';
+import orbImg from '../assets/zyricon-orb.png';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -32,16 +33,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center p-4 bg-[#09050f] text-slate-100 relative overflow-hidden font-sans select-none">
-      {/* Background ambient violet glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[550px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
+    <div className="h-screen w-screen flex items-center justify-center p-4 bg-[#030303] text-[#F4F2F5] relative overflow-hidden font-sans select-none">
+      {/* Background ambient purple glow */}
+      <div className="zyricon-ambient-glow absolute top-0 left-0 right-0 h-[56.25rem] pointer-events-none" />
 
-      <div className="w-full max-w-md zyricon-panel rounded-3xl p-8 sm:p-10 shadow-2xl relative z-10 border border-purple-500/20">
-        {/* Floating 3D Glowing Orb */}
+      <div className="w-full max-w-md bg-[#100C13] border border-[#514452] rounded-[36px] p-8 sm:p-10 shadow-2xl relative z-10 zyricon-workspace-bg">
+        {/* Luminous AI Orb & Branding */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="zyricon-orb mb-5" />
-          <h1 className="text-3xl font-bold tracking-tight text-white">Zyricon</h1>
-          <p className="text-xs text-slate-400 mt-2">
+          <img
+            src={orbImg}
+            alt="Zyricon AI"
+            className="w-20 h-20 rounded-full object-cover zyricon-orb-glow mb-5 transition-transform duration-300 hover:scale-105"
+          />
+          <h1 className="text-3xl font-medium tracking-tight text-[#F4F2F5]">Zyricon</h1>
+          <p className="text-xs text-[#99979D] mt-2">
             Intelligent Full-Stack Workspace powered by Supabase & Gemini
           </p>
         </div>
