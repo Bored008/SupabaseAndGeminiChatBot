@@ -421,7 +421,7 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
       <div className="flex-1 overflow-y-auto min-h-0 flex flex-col custom-scrollbar">
         {isInitialState ? (
           /* INITIAL VIEW: Luminous AI Orb + Centered Welcome Heading + Prompt Suggestions + Composer + Creation Cards */
-          <div className="flex-1 flex flex-col justify-between items-center w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[580px]">
+          <div className="flex-1 flex flex-col justify-start sm:justify-between items-center w-full max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-0">
             {/* Upper Welcome Region */}
             <div className="w-full flex flex-col items-center justify-center pt-2 sm:pt-4 pb-2 sm:pb-3">
               {/* Luminous AI Orb */}
@@ -460,7 +460,7 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
 
               {/* Prompt Composer */}
               <div className="relative w-full">
-                <div className="zyricon-composer-box rounded-[22px] sm:rounded-[26px] p-4 sm:p-5 flex flex-col justify-between h-[155px] sm:h-[175px] transition-all">
+                <div className="zyricon-composer-box rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between min-h-[145px] sm:h-[175px] transition-all">
                   {/* Top: Sparkle Icon + Textarea with real context placeholder */}
                   <div className="flex items-start gap-3">
                     <SparkleIcon className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" fill="#A855F7" />
@@ -495,47 +495,47 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
                   </div>
 
                   {/* Bottom Composer Toolbar */}
-                  <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-white/[0.04]">
+                  <div className="flex items-center justify-between gap-2 sm:gap-3 pt-2.5 border-t border-white/[0.04]">
                     {/* Left: Input Actions (Attach, divider, Settings, divider, Options) */}
-                    <div className="flex items-center gap-2.5 sm:gap-3.5">
+                    <div className="flex items-center gap-1.5 sm:gap-3.5">
                       {/* Attach Button */}
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-1.5 text-xs font-normal text-[#DDD6E2] hover:text-white transition cursor-pointer"
+                        className="flex items-center gap-1 sm:gap-1.5 text-xs font-normal text-[#DDD6E2] hover:text-white transition cursor-pointer"
                         title="Attach Context File"
                       >
                         <LinkIcon className="w-3.5 h-3.5 text-[#DDD6E2]" />
-                        <span>Attach</span>
+                        <span className="hidden xs:inline sm:inline">Attach</span>
                       </button>
 
                       {/* Action Divider */}
-                      <div className="h-4 w-[1px] bg-[#524755]" />
+                      <div className="h-3.5 sm:h-4 w-[1px] bg-[#524755]" />
 
                       {/* Settings Button */}
                       <button
                         onClick={() => setShowQuickSettings(!showQuickSettings)}
-                        className={`flex items-center gap-1.5 text-xs font-normal transition cursor-pointer ${
+                        className={`flex items-center gap-1 sm:gap-1.5 text-xs font-normal transition cursor-pointer ${
                           showQuickSettings ? 'text-purple-300' : 'text-[#DDD6E2] hover:text-white'
                         }`}
                         title="Quick Settings"
                       >
                         <SlidersIcon className="w-3.5 h-3.5" />
-                        <span>Settings</span>
+                        <span className="hidden xs:inline sm:inline">Settings</span>
                       </button>
 
                       {/* Action Divider */}
-                      <div className="h-4 w-[1px] bg-[#524755]" />
+                      <div className="h-3.5 sm:h-4 w-[1px] bg-[#524755]" />
 
                       {/* Options Button */}
                       <button
                         onClick={() => setShowQuickOptions(!showQuickOptions)}
-                        className={`flex items-center gap-1.5 text-xs font-normal transition cursor-pointer ${
+                        className={`flex items-center gap-1 sm:gap-1.5 text-xs font-normal transition cursor-pointer ${
                           showQuickOptions ? 'text-purple-300' : 'text-[#DDD6E2] hover:text-white'
                         }`}
                         title="Quick Prompt Presets"
                       >
                         <OptionsIcon className="w-3.5 h-3.5" />
-                        <span>Options</span>
+                        <span className="hidden xs:inline sm:inline">Options</span>
                       </button>
                     </div>
 
@@ -583,7 +583,7 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
 
                 {/* Quick Settings Drawer */}
                 {showQuickSettings && (
-                  <div className="absolute bottom-full left-0 mb-2.5 w-64 bg-[#020202] border border-[#514452] rounded-[20px] p-3.5 shadow-2xl z-40 text-xs">
+                  <div className="absolute bottom-full left-0 mb-2.5 w-64 max-w-[calc(100vw-2.5rem)] bg-[#020202] border border-[#514452] rounded-[20px] p-3.5 shadow-2xl z-40 text-xs">
                     <p className="font-medium text-[#F4F2F5] mb-2">AI Creativity Mode</p>
                     <div className="flex items-center gap-1.5">
                       {['Precise', 'Balanced', 'Creative'].map((mode) => (
@@ -608,7 +608,7 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
 
                 {/* Quick Options Drawer with real architectural presets */}
                 {showQuickOptions && (
-                  <div className="absolute bottom-full left-0 sm:left-24 mb-2.5 w-80 bg-[#020202] border border-[#514452] rounded-[20px] p-3.5 shadow-2xl z-40 text-xs space-y-1.5">
+                  <div className="absolute bottom-full left-0 sm:left-24 mb-2.5 w-80 max-w-[calc(100vw-2.5rem)] bg-[#020202] border border-[#514452] rounded-[20px] p-3.5 shadow-2xl z-40 text-xs space-y-1.5">
                     <p className="font-medium text-[#F4F2F5] mb-1">Architecture Presets</p>
                     {[
                       'How does get_recent_logins() RPC function protect against SQL injection and bypass table SELECT permissions?',
@@ -669,25 +669,25 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
           </div>
         ) : (
           /* ACTIVE CONVERSATION VIEW */
-          <div className="max-w-4xl w-full mx-auto px-4 sm:px-6 py-4 flex-1 flex flex-col justify-between space-y-4">
+          <div className="max-w-4xl w-full mx-auto px-2.5 sm:px-6 py-3 sm:py-4 flex-1 flex flex-col justify-between space-y-4">
             <div className="space-y-4">
               {messages.map((msg) => {
                 const isUser = msg.role === 'user';
                 return (
                   <div
                     key={msg.id}
-                    className={`flex items-start gap-2.5 group ${
+                    className={`flex items-start gap-2 sm:gap-2.5 group ${
                       isUser ? 'justify-end' : 'justify-start'
                     }`}
                   >
                     {!isUser && (
-                      <div className="w-8 h-8 rounded-full bg-[#2A272E] border border-white/5 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 shadow-sm">
-                        <SparkleIcon className="w-4 h-4 text-purple-400" fill="#A855F7" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#2A272E] border border-white/5 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 shadow-sm">
+                        <SparkleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" fill="#A855F7" />
                       </div>
                     )}
 
                     <div
-                      className={`max-w-[85%] rounded-[20px] p-3.5 sm:p-4 relative shadow-md transition-all ${
+                      className={`max-w-[90%] sm:max-w-[85%] rounded-[20px] p-3 sm:p-4 relative shadow-md transition-all ${
                         isUser
                           ? 'bg-[#2A272E] text-[#F4F2F5] border border-white/10'
                           : 'bg-[#020202] text-[#F4F2F5] border border-[#38343D]'
@@ -721,8 +721,8 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
                     </div>
 
                     {isUser && (
-                      <div className="w-8 h-8 rounded-full bg-purple-950/80 border border-purple-500/30 flex items-center justify-center text-purple-200 flex-shrink-0 mt-0.5 shadow-sm">
-                        <User className="w-4 h-4" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-purple-950/80 border border-purple-500/30 flex items-center justify-center text-purple-200 flex-shrink-0 mt-0.5 shadow-sm">
+                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </div>
                     )}
                   </div>
@@ -731,11 +731,11 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
 
               {/* Streaming Assistant Response */}
               {loading && streamingText && (
-                <div className="flex items-start gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-[#2A272E] border border-white/5 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 animate-pulse">
-                    <SparkleIcon className="w-4 h-4 text-purple-400" fill="#A855F7" />
+                <div className="flex items-start gap-2 sm:gap-2.5">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#2A272E] border border-white/5 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 animate-pulse">
+                    <SparkleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" fill="#A855F7" />
                   </div>
-                  <div className="max-w-[85%] rounded-[20px] p-3.5 sm:p-4 bg-[#020202] text-[#F4F2F5] border border-[#38343D] shadow-md">
+                  <div className="max-w-[90%] sm:max-w-[85%] rounded-[20px] p-3 sm:p-4 bg-[#020202] text-[#F4F2F5] border border-[#38343D] shadow-md">
                     <div className="flex items-center gap-2 mb-1.5 text-xs font-medium text-cyan-300">
                       <span>Gemini 2.5 Flash is streaming...</span>
                     </div>
@@ -788,13 +788,13 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
-                  <div className="flex items-center gap-2.5 text-xs text-[#DDD6E2]">
+                  <div className="flex items-center gap-2 sm:gap-2.5 text-xs text-[#DDD6E2]">
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="flex items-center gap-1 hover:text-white transition cursor-pointer"
                     >
                       <LinkIcon className="w-3.5 h-3.5" />
-                      <span>Attach</span>
+                      <span className="hidden xs:inline sm:inline">Attach</span>
                     </button>
                     <div className="h-3.5 w-[1px] bg-[#524755]" />
                     <button
@@ -802,7 +802,7 @@ export default function GeminiChatbot({ activeConversation, onSaveMessages }) {
                       className="flex items-center gap-1 hover:text-white transition cursor-pointer"
                     >
                       <SlidersIcon className="w-3.5 h-3.5" />
-                      <span>Settings</span>
+                      <span className="hidden xs:inline sm:inline">Settings</span>
                     </button>
                   </div>
 

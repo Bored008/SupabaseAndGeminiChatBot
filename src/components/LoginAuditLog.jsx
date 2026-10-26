@@ -153,23 +153,23 @@ export default function LoginAuditLog({ refreshTrigger, currentUserEmail }) {
     <div className="flex flex-col h-full bg-transparent text-[#F4F2F5] overflow-hidden relative">
 
       {/* Main Container */}
-      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col p-3 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full">
         {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center shadow-lg shadow-purple-600/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center shadow-lg shadow-purple-600/20 flex-shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                <h2 className="text-lg sm:text-2xl font-bold text-white tracking-tight">
                   Login Audit Log
                 </h2>
-                <span className="text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/25 px-2.5 py-0.5 rounded-full font-medium">
-                  RPC: get_recent_logins
+                <span className="text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/25 px-2 py-0.5 rounded-full font-medium">
+                  RPC
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
                 PostgreSQL Row Level Security Verified Sessions
               </p>
             </div>

@@ -15,6 +15,7 @@ import {
   Cpu,
   Layers,
   FileText,
+  Menu,
 } from 'lucide-react';
 import TechnicalReportModal from './TechnicalReportModal';
 
@@ -25,6 +26,7 @@ export default function Navbar({
   selectedModel,
   setSelectedModel,
   activeConversation,
+  onToggleMobileSidebar,
 }) {
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -80,17 +82,28 @@ export default function Navbar({
   return (
     <>
       {/* Workspace Toolbar */}
-      <header className="h-14 sm:h-16 px-4 sm:px-6 xl:px-8 flex items-center justify-between border-b border-white/[0.04] bg-transparent select-none z-30 flex-shrink-0">
-        {/* Left: Model Selector Pill */}
-        <div className="flex items-center justify-start flex-1 min-w-0">
+      <header className="h-14 sm:h-16 px-2.5 sm:px-6 xl:px-8 flex items-center justify-between border-b border-white/[0.04] bg-transparent select-none z-30 flex-shrink-0 gap-1.5 sm:gap-4">
+        {/* Left: Mobile Menu Toggle + Model Selector Pill */}
+        <div className="flex items-center justify-start flex-shrink-0 sm:flex-1 min-w-0 gap-1.5 sm:gap-2">
+          {/* Mobile Hamburger Toggle Button */}
+          <button
+            onClick={onToggleMobileSidebar}
+            className="md:hidden p-1.5 sm:p-2 rounded-xl bg-[#020202] border border-[#514452] text-[#F4F2F5] hover:bg-[#18131d] hover:text-white transition cursor-pointer flex items-center justify-center flex-shrink-0"
+            title="Open Menu"
+            aria-label="Open Sidebar Menu"
+          >
+            <Menu className="w-4 h-4 text-[#F4F2F5]" />
+          </button>
+
           <div className="relative">
             <button
               onClick={() => setShowModelDropdown(!showModelDropdown)}
-              className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-[#514452] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
+              className="h-8 sm:h-10 px-2.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-[#514452] text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-1.5 sm:gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
               title="Active Google Gemini Model"
             >
-              <span>{selectedModel || 'Gemini 2.5 Flash'}</span>
-              <ChevronDownIcon className="w-3.5 h-3.5 text-[#99979D]" />
+              <span className="hidden sm:inline">{selectedModel || 'Gemini 2.5 Flash'}</span>
+              <span className="sm:hidden">{selectedModel ? selectedModel.replace('Gemini ', '') : '2.5 Flash'}</span>
+              <ChevronDownIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#99979D]" />
             </button>
 
             {showModelDropdown && (
@@ -127,51 +140,55 @@ export default function Navbar({
         </div>
 
         {/* Center: Main Highlight View Switcher (Gemini Chat vs Login Audit Log) */}
-        <div className="flex items-center justify-center flex-shrink-0 mx-2 sm:mx-4">
-          <div className="flex items-center bg-[#020202] border border-purple-500/30 rounded-full p-1 sm:p-1.5 shadow-lg shadow-purple-950/40 backdrop-blur-md ring-1 ring-purple-500/15">
+        <div className="flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center bg-[#020202] border border-purple-500/30 rounded-full p-0.5 sm:p-1.5 shadow-lg shadow-purple-950/40 backdrop-blur-md ring-1 ring-purple-500/15">
             <button
               onClick={() => setActiveTab('chat')}
-              className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+              className={`px-2.5 sm:px-6 py-1 sm:py-2 rounded-full text-[11px] sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
                 activeTab === 'chat'
                   ? 'bg-gradient-to-r from-purple-700 to-purple-600 text-white shadow-md shadow-purple-900/50 border border-purple-400/30'
                   : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5'
               }`}
             >
-              <span className="whitespace-nowrap tracking-wide">Gemini Chat</span>
+              <span className="whitespace-nowrap tracking-tight sm:tracking-wide">
+                <span className="hidden sm:inline">Gemini </span>Chat
+              </span>
             </button>
 
             <button
               onClick={() => setActiveTab('audit')}
-              className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
+              className={`px-2.5 sm:px-6 py-1 sm:py-2 rounded-full text-[11px] sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
                 activeTab === 'audit'
                   ? 'bg-gradient-to-r from-purple-700 to-purple-600 text-white shadow-md shadow-purple-900/50 border border-purple-400/30'
                   : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5'
               }`}
             >
-              <span className="whitespace-nowrap tracking-wide">Audit Log</span>
+              <span className="whitespace-nowrap tracking-tight sm:tracking-wide">
+                Audit<span className="hidden sm:inline"> Log</span>
+              </span>
             </button>
           </div>
         </div>
 
         {/* Right: Workspace Actions */}
-        <div className="flex items-center justify-end gap-2.5 sm:gap-3 flex-1 min-w-0">
+        <div className="flex items-center justify-end gap-1.5 sm:gap-3 flex-shrink-0 sm:flex-1 min-w-0">
           {/* Configuration Action Pill */}
           <button
             onClick={() => setShowConfigModal(true)}
-            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
+            className="h-8 sm:h-10 px-2 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-1.5 sm:gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
             title="Configure System Architecture & Persona"
           >
-            <span>Configuration</span>
+            <span className="hidden md:inline">Configuration</span>
             <Sliders className="w-3.5 h-3.5 text-[#99979D]" />
           </button>
 
           {/* Export Action Pill */}
           <button
             onClick={handleExportChat}
-            className="h-9 sm:h-10 px-3.5 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
+            className="h-8 sm:h-10 px-2 sm:px-4 rounded-full bg-[#020202] hover:bg-[#18131d] border border-white/5 text-xs sm:text-[13px] font-normal text-[#F4F2F5] flex items-center justify-center gap-1.5 sm:gap-2 transition cursor-pointer shadow-sm whitespace-nowrap"
             title="Export Conversation Transcript"
           >
-            <span>Export</span>
+            <span className="hidden md:inline">Export</span>
             <MessageCircleIcon className="w-3.5 h-3.5 text-[#99979D]" />
           </button>
         </div>

@@ -23,12 +23,17 @@ export default function Sidebar({
   onDeleteConversation,
   isCollapsed,
   setIsCollapsed,
+  isMobileOpen,
+  setIsMobileOpen,
   userEmail,
   user,
 }) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [showSchemaModal, setShowSchemaModal] = useState(false);
   const [logoError, setLogoError] = useState(false);
+
+  // On mobile drawer, always display full expanded layout when open
+  const showExpanded = !isCollapsed || isMobileOpen;
 
   // Extract email domain to fetch provider logo or fallback to Gmail icon
   const emailDomain = userEmail?.includes('@') ? userEmail.split('@')[1].toLowerCase() : '';
@@ -44,6 +49,7 @@ export default function Sidebar({
 
   const handleStartPresetChat = (prompt) => {
     onNewChat();
+    setIsMobileOpen?.(false);
     // Dispatch custom event to seed prompt if needed
     window.dispatchEvent(new CustomEvent('zyricon:seed_prompt', { detail: { prompt } }));
   };
@@ -51,15 +57,19 @@ export default function Sidebar({
   return (
     <>
       <aside
-        className={`transition-all duration-300 ease-in-out flex flex-col bg-[#030303] text-[#F4F2F5] h-full select-none z-20 flex-shrink-0 ${
+        className={`fixed inset-y-0 left-0 z-50 md:static md:z-20 transition-all duration-300 ease-in-out flex flex-col bg-[#030303] text-[#F4F2F5] h-full select-none flex-shrink-0 border-r border-white/[0.08] md:border-r-0 ${
+          isMobileOpen
+            ? 'translate-x-0 w-72 max-w-[85vw] pt-4 px-3.5 pb-3 shadow-2xl'
+            : '-translate-x-full md:translate-x-0'
+        } ${
           isCollapsed
-            ? 'w-16 px-2 py-4'
-            : 'w-60 sm:w-64 lg:w-[270px] pt-4 px-3.5 pb-3 sm:pt-5 sm:px-4 sm:pb-4'
+            ? 'md:w-16 md:px-2 md:py-4'
+            : 'md:w-60 sm:md:w-64 lg:md:w-[270px] md:pt-4 md:px-3.5 md:pb-3 sm:md:pt-5 sm:md:px-4 sm:md:pb-4'
         }`}
       >
         {/* Brand Header */}
         <div className="h-10 flex items-center justify-between gap-2.5 mb-3.5 flex-shrink-0">
-          {!isCollapsed ? (
+          {showExpanded ? (
             <div className="flex items-center gap-2.5 min-w-0">
               {/* Circular brand emblem */}
               <div className="w-8 h-8 rounded-full bg-[#292A2D] flex items-center justify-center flex-shrink-0">
@@ -84,10 +94,19 @@ export default function Sidebar({
             </div>
           )}
 
-          {/* Sidebar Toggle Icon Button */}
+          {/* Close button on Mobile */}
+          <button
+            onClick={() => setIsMobileOpen?.(false)}
+            className="md:hidden p-1.5 rounded-lg text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5 transition cursor-pointer flex-shrink-0"
+            aria-label="Close sidebar"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Sidebar Toggle Icon Button on Desktop */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`p-1.5 rounded-lg text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5 transition cursor-pointer flex-shrink-0 ${
+            className={`hidden md:block p-1.5 rounded-lg text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/5 transition cursor-pointer flex-shrink-0 ${
               isCollapsed ? 'mx-auto mt-1' : ''
             }`}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
@@ -102,12 +121,12 @@ export default function Sidebar({
           <button
             onClick={onNewChat}
             className={`w-full flex items-center gap-2.5 py-2 sm:py-2.5 px-3 rounded-[14px] bg-[#2A272E] hover:bg-[#343039] border border-white/[0.04] text-[#F4F2F5] transition duration-150 cursor-pointer text-xs sm:text-sm font-normal shadow-sm ${
-              isCollapsed ? 'justify-center px-0' : ''
+              !showExpanded ? 'justify-center px-0' : ''
             }`}
             title="Start New Conversation"
           >
             <MessageCircleIcon className="w-4 h-4 text-[#F4F2F5] flex-shrink-0" />
-            {!isCollapsed && <span className="truncate">New Chat</span>}
+            {showExpanded && <span className="truncate">New Chat</span>}
           </button>
         </div>
 
@@ -115,7 +134,7 @@ export default function Sidebar({
         <div className="flex-1 overflow-y-auto min-h-0 space-y-4 pr-1 custom-scrollbar">
           {/* Features Group */}
           <div>
-            {!isCollapsed && (
+            {showExpanded && (
               <p className="px-2.5 text-[10.5px] font-medium text-[#99979D] uppercase tracking-wider mb-1">
                 Core Modules
               </p>
@@ -128,11 +147,11 @@ export default function Sidebar({
                   activeTab === 'chat'
                     ? 'bg-[#181024] text-[#F4F2F5] border border-[#2b193f]'
                     : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03]'
-                } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                } ${!showExpanded ? 'justify-center px-0' : ''}`}
                 title="Gemini Edge Chatbot (Task 3)"
               >
                 <Cpu className="w-4 h-4 flex-shrink-0 text-cyan-400" />
-                {!isCollapsed && <span className="truncate">Gemini Chatbot</span>}
+                {showExpanded && <span className="truncate">Gemini Chatbot</span>}
               </button>
 
               {/* Login Audit Log Item (Task 2) */}
@@ -142,35 +161,41 @@ export default function Sidebar({
                   activeTab === 'audit'
                     ? 'bg-[#181024] text-[#F4F2F5] border border-[#2b193f]'
                     : 'text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03]'
-                } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                } ${!showExpanded ? 'justify-center px-0' : ''}`}
                 title="PostgreSQL Login Audit Log (Task 2)"
               >
                 <ShieldCheck className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                {!isCollapsed && <span className="truncate">Login Audit Log</span>}
+                {showExpanded && <span className="truncate">Login Audit Log</span>}
               </button>
 
               {/* Database & RLS Schema (Task 1) */}
               <button
-                onClick={() => setShowSchemaModal(true)}
+                onClick={() => {
+                  setShowSchemaModal(true);
+                  setIsMobileOpen?.(false);
+                }}
                 className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition duration-150 cursor-pointer text-xs sm:text-[13px] font-normal text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03] ${
-                  isCollapsed ? 'justify-center px-0' : ''
+                  !showExpanded ? 'justify-center px-0' : ''
                 }`}
                 title="Inspect PostgreSQL RLS Policies & RPC (Task 1)"
               >
                 <DatabaseIcon className="w-4 h-4 flex-shrink-0 text-emerald-400" />
-                {!isCollapsed && <span className="truncate">PostgreSQL Schema & RLS</span>}
+                {showExpanded && <span className="truncate">PostgreSQL Schema & RLS</span>}
               </button>
 
               {/* Technical Report Modal */}
               <button
-                onClick={() => setShowReportModal(true)}
+                onClick={() => {
+                  setShowReportModal(true);
+                  setIsMobileOpen?.(false);
+                }}
                 className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition duration-150 cursor-pointer text-xs sm:text-[13px] font-normal text-[#99979D] hover:text-[#F4F2F5] hover:bg-white/[0.03] ${
-                  isCollapsed ? 'justify-center px-0' : ''
+                  !showExpanded ? 'justify-center px-0' : ''
                 }`}
                 title="View Technical Submission Report"
               >
                 <FileTextIcon className="w-4 h-4 flex-shrink-0 text-pink-400" />
-                {!isCollapsed && <span className="truncate">Technical Report</span>}
+                {showExpanded && <span className="truncate">Technical Report</span>}
               </button>
             </nav>
 
@@ -180,7 +205,7 @@ export default function Sidebar({
 
           {/* Workspaces Group */}
           <div>
-            {!isCollapsed && (
+            {showExpanded && (
               <p className="px-2.5 text-[10.5px] font-medium text-[#99979D] uppercase tracking-wider mb-1">
                 Conversations
               </p>
@@ -188,7 +213,7 @@ export default function Sidebar({
 
             <div className="space-y-0.5">
               {/* Active Conversation Threads */}
-              {!isCollapsed && (
+              {showExpanded && (
                 <div className="space-y-0.5">
                   {conversations && conversations.length > 0 ? (
                     conversations.map((conv) => {
@@ -259,7 +284,7 @@ export default function Sidebar({
         </div>
 
         {/* Project Architecture Panel (Replaces dummy upgrade panel) */}
-        {!isCollapsed && (
+        {showExpanded && (
           <div className="mt-2 pt-1 flex-shrink-0">
             <div className="zyricon-premium-panel rounded-[20px] border border-white/[0.04] p-3 sm:p-3.5 flex flex-col items-center gap-2 text-center">
               {/* Architecture Emblem */}
@@ -279,7 +304,10 @@ export default function Sidebar({
 
               {/* View Report Button */}
               <button
-                onClick={() => setShowReportModal(true)}
+                onClick={() => {
+                  setShowReportModal(true);
+                  setIsMobileOpen?.(false);
+                }}
                 className="w-full py-1.5 sm:py-2 px-3 rounded-xl bg-[#2A272E] hover:bg-[#343039] border border-white/[0.04] text-xs font-normal text-[#F4F2F5] transition duration-150 cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
               >
                 <span>Technical Report</span>
@@ -327,7 +355,7 @@ export default function Sidebar({
         )}
 
         {/* Collapsed Footer Logo & Logout */}
-        {isCollapsed && userEmail && (
+        {!showExpanded && userEmail && (
           <div className="mt-auto pt-2 flex flex-col items-center gap-2">
             <div
               className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center overflow-hidden p-1"

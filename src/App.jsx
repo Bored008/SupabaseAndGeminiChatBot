@@ -14,6 +14,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat' | 'audit'
   const [selectedModel, setSelectedModel] = useState('Gemini 2.5 Flash');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [refreshAuditTrigger, setRefreshAuditTrigger] = useState(0);
 
   // Email-scoped conversation storage state
@@ -242,26 +243,46 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#030303] text-[#F4F2F5] font-sans flex items-center justify-center p-0 sm:p-2 md:p-2.5 overflow-hidden select-none">
+    <div className="h-screen h-[100dvh] w-screen bg-[#030303] text-[#F4F2F5] font-sans flex items-center justify-center p-0 sm:p-2 md:p-2.5 overflow-hidden select-none">
       {/* Outer Application Shell */}
       <div className="w-full h-full max-w-[2048px] rounded-none sm:rounded-[28px] md:rounded-[36px] border-0 sm:border border-[#A193AA]/40 bg-[#030303] flex overflow-hidden relative shadow-2xl">
+        {/* Mobile Backdrop Overlay */}
+        {isMobileSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 md:hidden transition-opacity"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            aria-label="Close sidebar backdrop"
+          />
+        )}
+
         {/* Left Sidebar */}
         <Sidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={(tab) => {
+            setActiveTab(tab);
+            setIsMobileSidebarOpen(false);
+          }}
           conversations={conversations}
           activeConversationId={activeConversationId}
-          onSelectConversation={handleSelectConversation}
-          onNewChat={handleNewChat}
+          onSelectConversation={(id) => {
+            handleSelectConversation(id);
+            setIsMobileSidebarOpen(false);
+          }}
+          onNewChat={() => {
+            handleNewChat();
+            setIsMobileSidebarOpen(false);
+          }}
           onDeleteConversation={handleDeleteConversation}
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}
+          isMobileOpen={isMobileSidebarOpen}
+          setIsMobileOpen={setIsMobileSidebarOpen}
           userEmail={session.user.email}
           user={session.user}
         />
 
         {/* Creative Workspace */}
-        <div className="flex-1 my-0 sm:my-1.5 sm:mr-1.5 rounded-none sm:rounded-[22px] md:rounded-[28px] bg-[#100C13] overflow-hidden flex flex-col relative zyricon-workspace-bg">
+        <div className="flex-1 min-w-0 my-0 sm:my-1.5 sm:mr-1.5 rounded-none sm:rounded-[22px] md:rounded-[28px] bg-[#100C13] overflow-hidden flex flex-col relative zyricon-workspace-bg">
           {/* Ambient Glow Radial Overlay */}
           <div className="zyricon-ambient-glow absolute inset-0 w-full h-full pointer-events-none z-0" />
 
@@ -273,6 +294,7 @@ export default function App() {
             selectedModel={selectedModel}
             setSelectedModel={setSelectedModel}
             activeConversation={activeConversation}
+            onToggleMobileSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
           />
 
           {/* Main View Switcher Container */}

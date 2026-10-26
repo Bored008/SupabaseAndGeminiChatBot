@@ -18,39 +18,39 @@ export default function TechnicalReportModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 select-none">
-      <div className="bg-[#100C13] border border-[#514452] rounded-[28px] max-w-4xl w-full h-[85vh] max-h-[800px] flex flex-col shadow-2xl overflow-hidden relative zyricon-workspace-bg">
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4 select-none">
+      <div className="bg-[#100C13] border border-[#514452] rounded-[20px] sm:rounded-[28px] max-w-4xl w-full h-[92vh] sm:h-[85vh] max-h-[800px] flex flex-col shadow-2xl overflow-hidden relative zyricon-workspace-bg">
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-950/80 border border-purple-500/40 flex items-center justify-center text-purple-300 shadow-md">
-              <Layers className="w-5 h-5" />
+        <div className="p-3.5 sm:p-6 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-purple-950/80 border border-purple-500/40 flex items-center justify-center text-purple-300 shadow-md flex-shrink-0">
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-medium text-[#F4F2F5]">
-                  Full-Stack Technical Architecture Report
+                <h2 className="text-sm sm:text-xl font-medium text-[#F4F2F5] truncate">
+                  Full-Stack Technical Report
                 </h2>
-                <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
-                  Verified Production
+                <span className="hidden xs:inline-block sm:inline-block text-[10px] bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full font-mono">
+                  Verified
                 </span>
               </div>
-              <p className="text-xs text-[#99979D] mt-0.5">
-                FS-GenAI Assessment: Supabase Core + Google OAuth Audit Log + Gemini Edge Function
+              <p className="text-[11px] sm:text-xs text-[#99979D] mt-0.5 truncate">
+                FS-GenAI Assessment: Supabase + Google OAuth + Gemini Edge
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-[#99979D] hover:text-white hover:bg-white/5 transition cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-xl text-[#99979D] hover:text-white hover:bg-white/5 transition cursor-pointer flex-shrink-0 ml-2"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 pt-3 flex gap-2 border-b border-white/[0.04] bg-[#020202]/50 text-xs overflow-x-auto flex-shrink-0">
+        <div className="px-3 sm:px-6 pt-2 sm:pt-3 flex gap-2 border-b border-white/[0.04] bg-[#020202]/50 text-xs overflow-x-auto flex-shrink-0">
           {[
             { id: 'summary', label: 'Executive Summary', icon: Layers },
             { id: 'tasks', label: 'Assessment Tasks (1, 2, 3)', icon: CheckCircle2 },
@@ -77,7 +77,7 @@ export default function TechnicalReportModal({ isOpen, onClose }) {
         </div>
 
         {/* Modal Scroll Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs sm:text-sm text-[#F4F2F5] custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6 text-xs sm:text-sm text-[#F4F2F5] custom-scrollbar">
           {activeTab === 'summary' && (
             <div className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
