@@ -23,12 +23,15 @@ for insert
 to authenticated
 with check (auth.uid() = user_id);
 
--- Policy 2: Authenticated users can view all login records
+-- Policy 2: Users view own logins, project owner/admin views all
 create policy "Authenticated users can view logins"
 on public.login_logs
 for select
 to authenticated
-using (true);
+using (
+  auth.uid() = user_id
+  or (auth.jwt() ->> 'email') in ('dahiyahimanshu80@gmail.com')
+);
 
 -- 3. RPC Function to fetch recent logins (Task 1 - RPC)
 create or replace function public.get_recent_logins()
@@ -44,6 +47,9 @@ security invoker
 as $$
   select id, email, full_name, avatar_url, logged_in_at
   from public.login_logs
+  where
+    user_id = auth.uid()
+    or (auth.jwt() ->> 'email') in ('dahiyahimanshu80@gmail.com')
   order by logged_in_at desc
   limit 50;
 $$;
